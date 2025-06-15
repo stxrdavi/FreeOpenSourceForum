@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeOpenSourceForum con Assistente AI</title>
-    <!-- Carica la libreria di Supabase -->
+    <title>FreeOpenSourceForum con AI e Conferma</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <style>
-        /* Importa il font Poppins da Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
-
-        /* Definisce le variabili di colore per un facile theming */
         :root {
             --form-background: rgba(255, 255, 255, 0.1);
             --form-border: rgba(255, 255, 255, 0.2);
@@ -22,62 +18,32 @@
             --button-hover-background: #f0f0f0;
             --accent-color: #9f86ff;
             --accent-color-darker: #896ff0;
+            --success-color: #2dd4bf;
         }
-
-        /* Stili base per il corpo della pagina */
         body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden; /* Impedisce lo scroll */
-            font-family: 'Poppins', sans-serif;
-            background-color: #0c0a1a;
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            overflow: hidden; font-family: 'Poppins', sans-serif; background-color: #0c0a1a;
         }
-        
         #particle-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
         }
-
         .container {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            height: 100%;
-            max-width: 500px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
+            position: relative; z-index: 2; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            margin: 0 auto; padding: 20px; box-sizing: border-box;
         }
-
         .glass-form {
-            width: 100%;
-            background: var(--form-background);
-            border-radius: 40px;
-            border: 1px solid var(--form-border);
+            width: 100%; max-width: 500px; background: var(--form-background);
+            border-radius: 40px; border: 1px solid var(--form-border);
             backdrop-filter: blur(15px) saturate(150%);
             -webkit-backdrop-filter: blur(15px) saturate(150%);
-            padding: 40px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            padding: 40px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             transition: opacity 0.5s ease-out, transform 0.5s ease-out;
         }
-
         .form-header h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            color: var(--text-color);
+            margin: 0 0 10px 0; font-size: 2.5rem; font-weight: 700;
+            text-align: center; color: var(--text-color);
         }
-
         .form-group { margin-bottom: 25px; }
         .form-group label { display: block; margin-bottom: 10px; font-weight: 500; color: var(--text-color); }
         .form-group input[type="text"] {
@@ -90,7 +56,6 @@
             outline: none; border-color: rgba(255, 255, 255, 0.7);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
-
         .radio-group label {
             display: flex; align-items: center; padding: 15px; margin-bottom: 10px;
             background: var(--input-background); border: 1px solid var(--input-border);
@@ -108,133 +73,96 @@
             margin-right: 15px; border-radius: 50%; border: 2px solid var(--input-border);
             transition: all 0.3s ease; box-shadow: 0 0 5px rgba(0,0,0,0.2) inset;
         }
-
         .submit-btn {
             width: 100%; padding: 18px; border: none; border-radius: 20px;
             background: var(--button-background); color: var(--button-text); font-size: 1.1rem;
             font-weight: 700; cursor: pointer; transition: all 0.3s ease;
         }
         .submit-btn:hover:not(:disabled) { background: var(--button-hover-background); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
-        
         .submit-btn:disabled {
-            background-color: rgba(255, 255, 255, 0.5);
-            color: rgba(0,0,0,0.4);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+            background-color: rgba(255, 255, 255, 0.5); color: rgba(0,0,0,0.4);
+            cursor: not-allowed; transform: none; box-shadow: none;
         }
-        
-        #confirmation-message, #error-message {
+        #error-message {
             text-align: center; margin-top: 20px; font-size: 1.1rem; font-weight: 500;
             padding: 15px; border-radius: 20px; display: none;
+            background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fecaca;
         }
-        #confirmation-message { background: rgba(45, 211, 111, 0.2); border: 1px solid rgba(45, 211, 111, 0.4); color: #d1fae5; }
-        #error-message { background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fecaca; }
-
-        #ai-toggle-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, var(--accent-color), #be9ff6);
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
+        #confirmation-container {
+            display: none;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 40px;
+        }
+        .confirmation-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: rgba(45, 211, 191, 0.2); display: flex;
+            align-items: center; justify-content: center; margin-bottom: 25px;
+        }
+        .confirmation-icon svg { width: 40px; height: 40px; color: var(--success-color); }
+        #confirmation-container h2 { font-size: 2rem; color: var(--text-color); margin: 0 0 10px 0; }
+        #confirmation-container p { font-size: 1rem; color: rgba(255, 255, 255, 0.8); margin: 0; max-width: 300px; }
+
+        /* --- STILI ASSISTENTE AI AGGIORNATI --- */
+        #ai-toggle-btn {
+            position: fixed; bottom: 30px; right: 30px; z-index: 1000;
+            width: 60px; height: 60px; background: linear-gradient(45deg, var(--accent-color), #be9ff6);
+            border-radius: 50%; border: none; cursor: pointer; display: flex;
+            justify-content: center; align-items: center;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         #ai-toggle-btn:hover { transform: scale(1.1); box-shadow: 0 6px 25px rgba(0,0,0,0.4); }
         #ai-toggle-btn svg { width: 32px; height: 32px; color: white; }
-
         #ai-chat-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 999;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: rgba(0,0,0,0.3);
-            opacity: 0;
-            visibility: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 999; display: flex; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.3); opacity: 0; visibility: hidden;
             transition: opacity 0.4s ease, visibility 0.4s ease;
         }
         #ai-chat-container.visible { opacity: 1; visibility: visible; }
         #ai-chat-container.visible .ai-chat-window { transform: scale(1) translateY(0); opacity: 1; }
-        
         .ai-chat-window {
-            width: 100%;
-            max-width: 600px;
-            height: 80%;
-            max-height: 700px;
-            display: flex;
-            flex-direction: column;
-            transform: scale(0.9) translateY(20px);
-            opacity: 0;
-            transition: all 0.4s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%; max-width: 600px; height: 80%; max-height: 700px;
+            display: flex; flex-direction: column; transform: scale(0.9) translateY(20px);
+            opacity: 0; transition: all 0.4s ease;
         }
         .ai-chat-messages {
-            flex-grow: 1;
-            padding: 30px 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            flex-grow: 1; padding: 30px 20px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
         }
-        .ai-chat-messages::-webkit-scrollbar { width: 4px; }
-        .ai-chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
-
-        .chat-message {
-            padding: 12px 18px;
-            border-radius: 25px;
-            max-width: 80%;
-            line-height: 1.5;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .user-message {
-            background: linear-gradient(45deg, var(--accent-color), var(--accent-color-darker));
-            align-self: flex-end;
-            border-bottom-right-radius: 8px;
-            color: white;
-        }
-        .ai-message {
-            background: rgba(255, 255, 255, 0.2);
-            align-self: flex-start;
-            border-bottom-left-radius: 8px;
-        }
-        .ai-message.loading::after {
-            content: '...';
-            display: inline-block;
-            animation: loading-dots 1s infinite;
-        }
-        @keyframes loading-dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } }
-
-        .ai-chat-input-form {
+        .chat-message { padding: 12px 18px; border-radius: 25px; max-width: 80%; line-height: 1.5; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        .user-message { background: linear-gradient(45deg, var(--accent-color), var(--accent-color-darker)); align-self: flex-end; border-bottom-right-radius: 8px; color: white; }
+        .ai-message { background: rgba(255, 255, 255, 0.2); align-self: flex-start; border-bottom-left-radius: 8px; }
+        
+        /* Stili migliorati per input e pulsante */
+        #ai-chat-input-form {
             display: flex;
             gap: 10px;
             padding: 20px;
             border-top: 1px solid var(--form-border);
+            align-items: center; /* Allineamento verticale perfetto */
         }
         #ai-chat-input {
             flex-grow: 1;
+            height: 50px;
+            box-sizing: border-box;
             background: var(--input-background);
             border: 1px solid var(--input-border);
             color: var(--text-color);
-            border-radius: 50px;
+            border-radius: 25px; /* Angoli ben arrotondati */
             padding: 0 20px;
             font-size: 1rem;
+            transition: all 0.3s ease;
         }
+        #ai-chat-input::placeholder { color: rgba(255, 255, 255, 0.6); }
         #ai-chat-input:focus {
             outline: none;
             border-color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(159, 134, 255, 0.5); /* Effetto "glow" */
         }
         #ai-chat-submit {
             background: var(--accent-color);
@@ -243,20 +171,20 @@
             height: 50px;
             border-radius: 50%;
             border: none;
-            font-weight: 500;
             cursor: pointer;
-            transition: background 0.3s;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-shrink: 0;
+            transition: all 0.2s ease;
         }
-        #ai-chat-submit:hover { background: var(--accent-color-darker); }
-        #ai-chat-submit svg {
-            width: 24px;
-            height: 24px;
+        #ai-chat-submit:hover {
+            background: var(--accent-color-darker);
+            transform: scale(1.05);
         }
-
+        #ai-chat-submit:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -267,7 +195,7 @@
             <form id="freeopensourceform">
                 <div class="form-header"><h1>FreeOpenSourceForum</h1></div>
                 <div class="form-group">
-                    <label for="nome">1. Nome (obbligatorio)</label>
+                    <label for="nome">1. Nome</label>
                     <input type="text" id="nome" name="nome" placeholder="Il tuo nome">
                 </div>
                 <div class="form-group">
@@ -281,8 +209,17 @@
                 </div>
                 <button type="submit" class="submit-btn" disabled>Invia Risposta</button>
             </form>
-            <div id="confirmation-message">La tua risposta è stata inviata con successo. Grazie!</div>
             <div id="error-message"></div>
+        </div>
+
+        <div id="confirmation-container" class="glass-form">
+            <div class="confirmation-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+            </div>
+            <h2>Risposta registrata</h2>
+            <p>Le tue risposte sono state salvate con successo. Grazie per il tuo tempo!</p>
         </div>
     </div>
 
@@ -291,7 +228,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
         </svg>          
     </button>
-
     <div id="ai-chat-container">
         <div class="glass-form ai-chat-window">
              <div class="ai-chat-messages" id="ai-chat-messages">
@@ -308,61 +244,49 @@
         </div>
     </div>
 
-
     <script>
-        // --- SCRIPT PER L'ANIMAZIONE CANVAS ---
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
+        // SCRIPT ANIMAZIONE CANVAS
+        const bgCanvas = document.getElementById('particle-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
         let particlesArray;
-        function setCanvasSize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
         setCanvasSize();
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1;
-                this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)';
-            }
-            update() {
-                if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
-                if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
-                this.x += this.speedX; this.y += this.speedY;
-            }
-            draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
-        }
-        function initParticles() {
-            particlesArray = []; let numberOfParticles = (canvas.height * canvas.width) / 9000;
-            for (let i = 0; i < numberOfParticles; i++) { particlesArray.push(new Particle()); }
-        }
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); particlesArray[i].draw(); }
-            connect(); requestAnimationFrame(animate);
-        }
+        class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } }
+        function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } }
         function connect() {
             let opacityValue = 1;
             for (let a = 0; a < particlesArray.length; a++) {
                 for (let b = a; b < particlesArray.length; b++) {
                     let distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2);
-                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                    if (distance < (bgCanvas.width / 7) * (bgCanvas.height / 7)) {
                         opacityValue = 1 - (distance / 20000);
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${opacityValue})`; ctx.lineWidth = 1;
-                        ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
+                        bgCtx.strokeStyle = `rgba(255, 255, 255, ${opacityValue})`;
+                        bgCtx.lineWidth = 1;
+                        bgCtx.beginPath();
+                        bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        bgCtx.stroke();
                     }
                 }
             }
         }
+        function animateBg() {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); particlesArray[i].draw(); }
+            connect();
+            requestAnimationFrame(animateBg);
+        }
+        initParticles(); animateBg();
         window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
-        initParticles(); animate();
 
-        // --- SCRIPT PER IL FORM E SUPABASE ---
+        // SCRIPT FORM E SUPABASE
         const SUPABASE_URL = 'https://xvjnpwatfpjceqqkraze.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2ampucHdhdGZwamNlcXFrcmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDkwNDgsImV4cCI6MjA2NTU4NTA0OH0.Lt0m8t4o8UZdSGV9kjMT0i4bahqoA2NOJHG-2ueE6g8';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const form = document.getElementById('freeopensourceform');
-        const confirmationMessage = document.getElementById('confirmation-message');
         const errorMessage = document.getElementById('error-message');
         const mainFormContainer = document.getElementById('main-form-container');
-        
+        const confirmationContainer = document.getElementById('confirmation-container');
         const nomeInput = document.getElementById('nome');
         const sceltaRadios = document.querySelectorAll('input[name="scelta"]');
         const submitBtn = form.querySelector('.submit-btn');
@@ -372,9 +296,7 @@
             const isSceltaValid = Array.from(sceltaRadios).some(radio => radio.checked);
             submitBtn.disabled = !(isNomeValid && isSceltaValid);
         }
-        
         nomeInput.addEventListener('input', validateForm);
-
         let lastCheckedRadio = null;
         sceltaRadios.forEach(radio => {
             radio.addEventListener('click', (event) => {
@@ -387,95 +309,63 @@
                 validateForm();
             });
         });
-
+        function showConfirmationScreen() {
+            mainFormContainer.style.opacity = '0';
+            setTimeout(() => { 
+                mainFormContainer.style.display = 'none';
+                confirmationContainer.style.display = 'flex';
+            }, 500);
+        }
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             if(submitBtn.disabled) return;
-            
             submitBtn.textContent = 'Invio in corso...';
             submitBtn.disabled = true;
-            
-            confirmationMessage.style.display = 'none'; 
             errorMessage.style.display = 'none';
-            
             const formData = new FormData(form); 
             const nome = formData.get('nome'); 
             const scelta = formData.get('scelta');
-            
             try {
-                // FIX: Prova a recuperare l'IP, ma continua anche se fallisce
-                let userIpAddress = 'non disponibile';
-                try {
-                    const ipResponse = await fetch('https://api.ipify.org?format=json');
-                    if (ipResponse.ok) {
-                        const ipData = await ipResponse.json();
-                        userIpAddress = ipData.ip;
-                    } else {
-                        console.warn(`Impossibile recuperare l'IP. Status: ${ipResponse.status}`);
-                    }
-                } catch (fetchError) {
-                    console.warn("Recupero IP fallito. Potrebbe essere bloccato da un ad-blocker o dalla rete. Procedo senza IP.", fetchError);
-                }
-                
-                const fileContent = JSON.stringify({
-                    nome: nome,
-                    scelta: scelta,
-                    ip_address: userIpAddress,
-                    submitted_at: new Date().toISOString()
-                });
+                const fileContent = JSON.stringify({ nome: nome, scelta: scelta, submitted_at: new Date().toISOString() });
                 const fileName = `submissions/${nome.replace(/\s+/g, '_') || 'anonimo'}_${Date.now()}.json`;
-
-                const { data, error } = await supabaseClient
-                    .storage
-                    .from('user-ips')
-                    .upload(fileName, fileContent, {
-                        contentType: 'application/json',
-                        upsert: false
-                    });
-
+                const { data, error } = await supabaseClient.storage.from('answers').upload(fileName, fileContent, { contentType: 'application/json', upsert: false });
+                
+                // FIX: Gestione dell'errore migliorata
                 if (error) {
+                    // Controlla se l'errore è di tipo "fetch"
+                    if (error.message === 'Failed to fetch') {
+                         throw new Error("Errore di rete. Controlla la tua connessione e assicurati che nessun ad-blocker stia interferendo.");
+                    }
                     if (error.message.includes('Bucket not found')) {
-                        throw new Error("Bucket 'user-ips' non trovato. Assicurati di averlo creato nel tuo progetto Supabase.");
+                        throw new Error("Bucket 'answers' non trovato. Assicurati di averlo creato in Supabase.");
                     }
                     throw error;
                 }
-
-                mainFormContainer.style.opacity = '0';
-                setTimeout(() => { 
-                    form.style.display = 'none'; 
-                    confirmationMessage.style.display = 'block'; 
-                    mainFormContainer.style.opacity = '1'; 
-                }, 500);
+                
+                showConfirmationScreen();
 
             } catch (error) {
-                console.error('Errore durante l\'invio:', error.message);
-                errorMessage.textContent = `Si è verificato un errore: ${error.message}`; 
+                console.error("Errore durante l'invio:", error);
+                errorMessage.textContent = `Si è verificato un errore: ${error.message}`;
                 errorMessage.style.display = 'block';
                 validateForm(); 
                 submitBtn.textContent = 'Invia Risposta';
             }
         });
-
-        // --- SCRIPT PER ASSISTENTE AI ---
+        
+        // SCRIPT ASSISTENTE AI
         const aiToggleBtn = document.getElementById('ai-toggle-btn');
         const aiChatContainer = document.getElementById('ai-chat-container');
         const aiChatForm = document.getElementById('ai-chat-form');
         const aiChatInput = document.getElementById('ai-chat-input');
         const aiChatMessages = document.getElementById('ai-chat-messages');
-
         aiToggleBtn.addEventListener('click', () => {
             aiChatContainer.classList.toggle('visible');
-            if (aiChatContainer.classList.contains('visible')) {
-                aiChatInput.focus();
-            }
+            if (aiChatContainer.classList.contains('visible')) { aiChatInput.focus(); }
         });
-
         aiChatContainer.addEventListener('click', (e) => {
-            if (e.target === aiChatContainer) {
-                aiChatContainer.classList.remove('visible');
-            }
+            if (e.target === aiChatContainer) { aiChatContainer.classList.remove('visible'); }
         });
-        
         aiChatForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const userMessage = aiChatInput.value.trim();
@@ -485,7 +375,6 @@
                 getAiResponse(userMessage);
             }
         });
-
         function addMessage(text, sender) {
             const messageElement = document.createElement('div');
             messageElement.classList.add('chat-message', `${sender}-message`);
@@ -494,7 +383,6 @@
             aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
             return messageElement;
         }
-
         function typeMessage(element, text) {
             element.textContent = '';
             element.classList.remove('loading');
@@ -510,52 +398,35 @@
             }
             typing();
         }
-
         async function getAiResponse(prompt) {
             const loadingElement = addMessage("Sto pensando", 'ai');
             loadingElement.classList.add('loading');
-            
             const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-            
             const systemInstruction = "Sei un assistente AI amichevole chiamato 'Sparky'. Sii conciso e vai dritto al punto. Rispondi sempre in modo gentile, positivo e usa emoji appropriate. 😊";
             const fullPrompt = `${systemInstruction}\n\nDomanda dell'utente: "${prompt}"`;
-
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ 
-                            role: "user", 
-                            parts: [{ text: fullPrompt }] 
-                        }]
-                    })
+                    body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: fullPrompt }] }] })
                 });
-
                 if (!response.ok) {
                     const errorBody = await response.json().catch(() => ({ message: response.statusText }));
                     throw new Error(`Errore API: ${errorBody.message || response.statusText}`);
                 }
-
                 const result = await response.json();
-                
                 let aiText = "Ops, qualcosa è andato storto. 😥 Riprova, per favore!";
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
+                if (result.candidates && result.candidates[0].content && result.candidates[0].content.parts[0]) {
                     aiText = result.candidates[0].content.parts[0].text;
                 }
-                
                 typeMessage(loadingElement, aiText);
-
             } catch (error) {
                 console.error("Errore chiamata Gemini:", error);
                 loadingElement.textContent = `Si è verificato un errore di rete. Controlla la tua connessione.`;
                 loadingElement.classList.remove('loading');
             }
         }
-
     </script>
 </body>
 </html>
