@@ -78,11 +78,11 @@
         #ai-chat-input-form { display: flex; gap: 10px; padding: 15px; border-top: 1px solid var(--form-border); align-items: center; }
         #ai-chat-input { flex-grow: 1; height: 48px; border-radius: 24px; padding: 0 20px; }
         #ai-chat-submit { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; }
-        #answers-modal .modal-content { max-width: 700px; text-align: left; }
-        #answers-list { max-height: 60vh; overflow-y: auto; padding-right: 15px; }
-        .response-item { border-bottom: 1px solid var(--form-border); padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        .response-item p { margin: 0; }
-        .response-item .cta-button { font-size: 0.9rem; padding: 8px 15px; }
+        #module-links-modal .modal-content, #answers-modal .modal-content { max-width: 700px; text-align: left; }
+        .link-display { background: var(--input-background); padding: 15px 20px; border-radius: 15px; word-break: break-all; margin-top: 5px; }
+        #answers-modal .response-item { border-bottom: 1px solid var(--form-border); padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+        #answers-modal .response-item p { margin: 0; }
+        #answers-modal .response-item .cta-button { font-size: 0.9rem; padding: 8px 15px; }
     </style>
 </head>
 <body>
@@ -110,7 +110,6 @@
             </div>
         </div>
     </div>
-
     <div id="login-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="modal-close-btn" id="modal-close-btn">&times;</button>
@@ -134,14 +133,6 @@
              <div id="answers-list">Nessuna risposta ancora.</div>
         </div>
     </div>
-    <button id="ai-toggle-btn" aria-label="Apri assistente AI"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg></button>
-    <div id="ai-chat-container">
-        <div class="ai-chat-window">
-             <div class="ai-chat-header"><h3>Assistente AI</h3><button class="close-btn" id="ai-close-btn">&times;</button></div>
-             <div class="ai-chat-messages" id="ai-chat-messages"><div class="chat-message ai-message">Ciao! Sono Sparky ✨ Come posso aiutarti?</div></div>
-             <form class="ai-chat-input-form" id="ai-chat-form"><input type="text" id="ai-chat-input" placeholder="Scrivi una domanda..." autocomplete="off" required><button type="submit" id="ai-chat-submit" aria-label="Invia messaggio"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg></button></form>
-        </div>
-    </div>
     <div id="confirm-modal" class="modal-overlay">
         <div class="modal-content">
             <h2 id="confirm-modal-title">Conferma Eliminazione</h2>
@@ -152,13 +143,21 @@
             </div>
         </div>
     </div>
+    <button id="ai-toggle-btn" aria-label="Apri assistente AI"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg></button>
+    <div id="ai-chat-container">
+        <div class="ai-chat-window">
+             <div class="ai-chat-header"><h3>Assistente AI</h3><button class="close-btn" id="ai-close-btn">&times;</button></div>
+             <div class="ai-chat-messages" id="ai-chat-messages"><div class="chat-message ai-message">Ciao! Sono Sparky ✨ Come posso aiutarti?</div></div>
+             <form class="ai-chat-input-form" id="ai-chat-form"><input type="text" id="ai-chat-input" placeholder="Scrivi una domanda..." autocomplete="off" required><button type="submit" id="ai-chat-submit" aria-label="Invia messaggio"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg></button></form>
+        </div>
+    </div>
 
     <script>
-        const SUPABASE_URL = 'https://xvjjnpwatfpjceqqkraz.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2ampucHdhdGZwamNlcXFrcmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDkwNDgsImV4cCI6MjA2NTU4NTA0OH0.Lt0m8t4o8UZdSGV9kjMT0i4bahqoA2NOJHG-2ueE6g8';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         document.addEventListener('DOMContentLoaded', () => {
+            const SUPABASE_URL = 'https://xvjjnpwatfpjceqqkraz.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2ampucHdhdGZwamNlcXFrcmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDkwNDgsImV4cCI6MjA2NTU4NTA0OH0.Lt0m8t4o8UZdSGV9kjMT0i4bahqoA2NOJHG-2ueE6g8';
+            const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
             const mainCtaBtn = document.getElementById('main-cta-btn');
             const logoutBtn = document.getElementById('logout-btn');
             const userInfo = document.getElementById('user-info');
@@ -174,11 +173,12 @@
             const answersModal = document.getElementById('answers-modal');
             const answersList = document.getElementById('answers-list');
             const answersModalCloseBtn = document.getElementById('answers-modal-close-btn');
+            
             let isLoginMode = true;
-            let currentUser = null;
+            let currentUser = null; 
 
             const updateUI = (user) => {
-                currentUser = user;
+                currentUser = user; 
                 if (user) {
                     mainCtaBtn.textContent = 'Inizia a Creare Ora';
                     userInfo.style.display = 'flex';
@@ -203,7 +203,7 @@
                 if (e.target === loginModal) loginModal.style.display = 'none';
             });
             modalCloseBtn.addEventListener('click', () => loginModal.style.display = 'none');
-
+            
             document.getElementById('switch-btn').addEventListener('click', () => {
                 isLoginMode = !isLoginMode;
                 document.getElementById('modal-title').textContent = isLoginMode ? 'Accedi' : 'Registrati';
@@ -239,15 +239,15 @@
                     modalError.style.display = 'block';
                 }
             });
-
+            
             logoutBtn.addEventListener('click', async () => {
                 await supabaseClient.auth.signOut();
             });
-
+            
             supabaseClient.auth.onAuthStateChange((_event, session) => {
                 updateUI(session?.user);
             });
-
+            
             document.getElementById('toggle-password').addEventListener('click', function() {
                 const passwordInput = document.getElementById('password');
                 const eyeIcon = this.querySelector('.eye-icon');
@@ -275,7 +275,7 @@
                 myModulesSection.style.display = 'none';
             });
             
-            document.getElementById('my-modules-list').addEventListener('click', (e) => {
+            document.getElementById('my-modules-list').addEventListener('click', async (e) => {
                 const confirmModal = document.getElementById('confirm-modal');
                 const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
                 const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
@@ -326,7 +326,7 @@
                     data.forEach(module => {
                         const item = document.createElement('div');
                         item.className = 'module-item';
-                        item.innerHTML = `<span class="module-item-title" data-id="${module.id}">${module.title}</span><button class="delete-btn" data-id="${module.id}">Elimina</button>`;
+                        item.innerHTML = `<span class="module-item-title" onclick="window.location.href='./crea.html?id=${module.id}'">${module.title}</span><button class="delete-btn" data-id="${module.id}">Elimina</button>`;
                         list.appendChild(item);
                     });
                 } else {
@@ -334,19 +334,8 @@
                 }
             }
             
-            const bgCanvas = document.getElementById('particle-canvas');
-            const bgCtx = bgCanvas.getContext('2d');
-            let particlesArray;
-            function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
-            class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } }
-            function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } }
-            function connect() { let o = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let d = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2); if (d < (bgCanvas.width / 7) * (bgCanvas.height / 7)) { o = 1 - (d / 20000); bgCtx.strokeStyle = `rgba(255, 255, 255, ${o})`; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y); bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y); bgCtx.stroke(); } } } }
-            function animateBg() { bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); particlesArray.forEach(p => { p.update(); p.draw(); }); connect(); requestAnimationFrame(animateBg); }
-            setCanvasSize();
-            initParticles();
-            animateBg();
-            window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
-    
+            const bgCanvas = document.getElementById('particle-canvas'); const bgCtx = bgCanvas.getContext('2d'); let particlesArray; function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; } setCanvasSize(); class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } } function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } } function connect() { let o = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let d = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2); if (d < (bgCanvas.width / 7) * (bgCanvas.height / 7)) { o = 1 - (d / 20000); bgCtx.strokeStyle = `rgba(255, 255, 255, ${o})`; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y); bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y); bgCtx.stroke(); } } } } function animateBg() { bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); particlesArray.forEach(p => { p.update(); p.draw(); }); connect(); requestAnimationFrame(animateBg); } initParticles(); animateBg(); window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
+
             function setupAIChat() {
                 const aiToggleBtn = document.getElementById('ai-toggle-btn');
                 const aiChatContainer = document.getElementById('ai-chat-container');
@@ -354,7 +343,7 @@
                 const aiChatInput = document.getElementById('ai-chat-input');
                 const aiChatMessages = document.getElementById('ai-chat-messages');
                 const aiCloseBtn = document.getElementById('ai-close-btn');
-    
+
                 if(aiToggleBtn) aiToggleBtn.addEventListener('click', () => { aiChatContainer.classList.add('visible'); aiChatInput.focus(); });
                 if(aiCloseBtn) aiCloseBtn.addEventListener('click', () => aiChatContainer.classList.remove('visible'));
                 if(aiChatContainer) aiChatContainer.addEventListener('click', (e) => { if (e.target === aiChatContainer) aiChatContainer.classList.remove('visible'); });
