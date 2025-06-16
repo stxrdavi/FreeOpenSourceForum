@@ -47,6 +47,7 @@
         .confirmation-icon svg { width: 40px; height: 40px; color: var(--success-color); }
         .question-block { border: 1px solid var(--form-border); padding: 25px; border-radius: 25px; margin-bottom: 25px; background: rgba(0,0,0,0.1); }
         .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+        .error-message { text-align: center; margin-top: 20px; padding: 15px; border-radius: 20px; display: none; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.4); color: #fecaca; }
         
         #ai-toggle-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; width: 60px; height: 60px; background: linear-gradient(45deg, var(--accent-color), #be9ff6); border-radius: 50%; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
         #ai-toggle-btn:hover { transform: scale(1.1); }
@@ -80,10 +81,11 @@
                 </div>
                 <button type="button" id="add-question-btn" class="btn btn-secondary" style="margin-top:20px; margin-bottom:20px;">Aggiungi un'altra Domanda</button>
                 <button type="submit" id="create-forum-btn" class="btn">Crea Modulo</button>
+                <div id="creator-error-message" class="error-message"></div>
             </form>
         </div>
 
-        <div id="viewer-section" class="glass-form" style="display: none;"><form id="forum-viewer-form"><div class="form-header"><h2 id="viewer-title"></h2></div><div class="form-group"><label for="viewer-name">Il tuo Nome</label><input type="text" id="viewer-name" placeholder="Inserisci il tuo nome" required></div><div id="viewer-questions-container"></div><button type="submit" id="submit-answer-btn" class="btn" disabled>Invia Risposte</button></form></div>
+        <div id="viewer-section" class="glass-form" style="display: none;"><form id="forum-viewer-form"><div class="form-header"><h2 id="viewer-title"></h2></div><div class="form-group"><label for="viewer-name">Il tuo Nome</label><input type="text" id="viewer-name" placeholder="Inserisci il tuo nome" required></div><div id="viewer-questions-container"></div><button type="submit" id="submit-answer-btn" class="btn" disabled>Invia Risposte</button><div id="viewer-error-message" class="error-message"></div></form></div>
         
         <div id="creator-confirmation-section" class="glass-form" style="display: none; text-align: center;">
             <div class="confirmation-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg></div>
@@ -176,8 +178,10 @@
         async function createForum(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
+            const errorMessage = document.getElementById('creator-error-message');
             btn.textContent = 'Creazione...';
             btn.disabled = true;
+            errorMessage.style.display = 'none';
 
             const title = document.getElementById('forum-title').value;
             const questionsData = Array.from(document.querySelectorAll('.question-block')).map(block => ({
@@ -199,7 +203,13 @@
                 creatorSection.style.display = 'none';
                 creatorConfirmationSection.style.display = 'block';
             } catch (error) {
-                alert("Errore: " + error.message);
+                console.error("Errore creazione modulo:", error);
+                if (error.message.toLowerCase().includes('failed to fetch')) {
+                    errorMessage.textContent = "Errore di rete. Controlla la tua connessione e che il progetto Supabase sia attivo.";
+                } else {
+                    errorMessage.textContent = "Si è verificato un errore: " + error.message;
+                }
+                errorMessage.style.display = 'block';
                 btn.textContent = 'Crea Modulo';
                 btn.disabled = false;
             }
@@ -236,6 +246,7 @@
             const nameInput = document.getElementById('viewer-name');
             const submitBtn = document.getElementById('submit-answer-btn');
             const form = document.getElementById('forum-viewer-form');
+            const errorMessage = document.getElementById('viewer-error-message');
 
             const validate = () => {
                 const nameValid = nameInput.value.trim() !== '';
@@ -249,6 +260,8 @@
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 submitBtn.disabled = true;
+                errorMessage.style.display = 'none';
+
                 const name = nameInput.value;
                 const answersData = Array.from(document.querySelectorAll('#viewer-questions-container .question-block')).map((block, index) => {
                     const questionText = block.querySelector('label').textContent;
@@ -263,7 +276,13 @@
                     viewerSection.style.display = 'none';
                     viewerConfirmationSection.style.display = 'block';
                 } catch (error) {
-                    alert("Errore invio: " + error.message);
+                    console.error("Errore invio risposta:", error);
+                    if (error.message.toLowerCase().includes('failed to fetch')) {
+                        errorMessage.textContent = "Errore di rete. Impossibile inviare la risposta.";
+                    } else {
+                        errorMessage.textContent = "Errore: " + error.message;
+                    }
+                    errorMessage.style.display = 'block';
                     submitBtn.disabled = false;
                 }
             });
@@ -284,7 +303,7 @@
                 const loadingEl = addMessage("...", 'ai');
                 const apiKey = "AIzaSyCyllM7dVlaX0jwRAt8cjIypCpF3u3uBBc";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                const systemInstruction = "Sei Sparky, un AI assistant. Sii conciso, amichevole e usa emoji. 😊";
+                const systemInstruction = "Sei Sparky, un AI assistant. Sii conciso, amichevole e usa emoji. �";
                 try {
                     const res = await fetch(apiUrl, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `${systemInstruction}\nUtente: "${prompt}"` }] }] }) });
                     if (!res.ok) throw new Error("Errore API");
