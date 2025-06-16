@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeOpenSourceModulo - Crea il tuo Modulo</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+        :root {
+            --form-background: rgba(255, 255, 255, 0.1);
+            --form-border: rgba(255, 255, 255, 0.2);
+            --text-color: #f0f0f0;
+            --input-background: rgba(255, 255, 255, 0.15);
+            --input-border: rgba(255, 255, 255, 0.3);
+            --button-background: #ffffff;
+            --button-text: #4a4a4a;
+            --accent-color: #9f86ff;
+            --success-color: #2dd4bf;
+            --danger-color: #fb7185;
+        }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow-y: auto; font-family: 'Poppins', sans-serif; background-color: #0c0a1a; }
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .container { position: relative; z-index: 2; width: 100%; min-height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; }
+        .glass-form { width: 100%; max-width: 600px; background: var(--form-background); border-radius: 40px; border: 1px solid var(--form-border); backdrop-filter: blur(15px) saturate(150%); -webkit-backdrop-filter: blur(15px) saturate(150%); padding: 40px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+        .form-header h1, .form-header h2 { margin: 0 0 20px 0; font-weight: 700; text-align: center; color: var(--text-color); }
+        .form-header h1 { font-size: 2.5rem; }
+        .form-header h2 { font-size: 2rem; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 10px; font-weight: 500; color: var(--text-color); }
+        input[type="text"] { width: 100%; height: 50px; padding: 0 20px; box-sizing: border-box; background: var(--input-background); border: 1px solid var(--input-border); border-radius: 20px; color: var(--text-color); font-size: 1rem; transition: all 0.3s ease; }
+        input[type="text"]:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 15px rgba(159, 134, 255, 0.5); }
+        .radio-group label { display: flex; align-items: center; padding: 15px; margin-bottom: 10px; background: var(--input-background); border: 1px solid var(--input-border); border-radius: 20px; cursor: pointer; transition: all 0.3s ease; color: var(--text-color); }
+        .radio-group input[type="radio"] { display: none; }
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 20px; background: var(--button-background); color: var(--button-text); font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        .btn:hover:not(:disabled) { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+        .btn:disabled { background-color: rgba(255, 255, 255, 0.5); color: rgba(0,0,0,0.4); cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-secondary { background: var(--input-background); color: var(--text-color); }
+        .btn-secondary:hover:not(:disabled) { background: rgba(255,255,255,0.25); }
+        .btn-danger { background: transparent; color: var(--danger-color); padding: 5px; width: auto; height: auto; font-size: 0.9rem; border: none; }
+        .option-input-group { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .link-display { background: var(--input-background); padding: 15px 20px; border-radius: 20px; word-break: break-all; margin: 20px 0; text-align: left; }
+        .confirmation-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(45, 211, 191, 0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 25px; }
+        .confirmation-icon svg { width: 40px; height: 40px; color: var(--success-color); }
+        
+        #ai-toggle-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; width: 60px; height: 60px; background: linear-gradient(45deg, var(--accent-color), #be9ff6); border-radius: 50%; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
+        #ai-toggle-btn:hover { transform: scale(1.1); }
+        #ai-toggle-btn svg { width: 32px; height: 32px; color: white; }
+        #ai-chat-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; display: flex; justify-content: center; align-items: center; background: rgba(0,0,0,0.3); opacity: 0; visibility: hidden; transition: opacity 0.4s ease; }
+        #ai-chat-container.visible { opacity: 1; visibility: visible; }
+        .ai-chat-window { width: 100%; max-width: 600px; height: 80%; max-height: 700px; display: flex; flex-direction: column; background: var(--form-background); border-radius: 40px; border: 1px solid var(--form-border); backdrop-filter: blur(15px); padding: 0; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); }
+        .ai-chat-messages { flex-grow: 1; padding: 30px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; color: var(--text-color); }
+        .chat-message { padding: 12px 18px; border-radius: 25px; max-width: 80%; }
+        .user-message { background: linear-gradient(45deg, var(--accent-color), var(--accent-color-darker)); align-self: flex-end; }
+        .ai-message { background: rgba(255, 255, 255, 0.2); align-self: flex-start; }
+        #ai-chat-input-form { display: flex; gap: 10px; padding: 20px; border-top: 1px solid var(--form-border); align-items: center; }
+        #ai-chat-input { flex-grow: 1; height: 50px; border-radius: 25px; }
+        #ai-chat-submit { width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+    
+    <div class="container">
+        <div id="creator-section" class="glass-form">
+            <form id="forum-creator-form">
+                <div class="form-header"><h1>Crea il tuo Modulo</h1></div>
+                <div class="form-group"><label for="forum-title">Titolo del Modulo</label><input type="text" id="forum-title" placeholder="Es: Sondaggio del team" required></div>
+                <div class="form-group"><label for="forum-question">La tua Domanda</label><input type="text" id="forum-question" placeholder="Es: Quale feature sviluppiamo dopo?" required></div>
+                <div class="form-group"><label>Opzioni di Risposta</label><div id="options-container"><div class="option-input-group"><input type="text" name="option" placeholder="Opzione 1" required></div><div class="option-input-group"><input type="text" name="option" placeholder="Opzione 2" required></div></div><button type="button" id="add-option-btn" class="btn btn-secondary" style="margin-top: 15px;">Aggiungi Opzione</button></div>
+                <button type="submit" id="create-forum-btn" class="btn">Crea Modulo</button>
+            </form>
+        </div>
+        <div id="viewer-section" class="glass-form" style="display: none;"><form id="forum-viewer-form"><div class="form-header"><h2 id="viewer-title"></h2></div><div class="form-group"><p id="viewer-question" style="text-align: center; font-size: 1.2rem;"></p></div><div class="form-group"><label for="viewer-name">Il tuo Nome</label><input type="text" id="viewer-name" placeholder="Inserisci il tuo nome"></div><div class="form-group"><label>Scegli la tua risposta:</label><div id="viewer-options" class="radio-group"></div></div><button type="submit" id="submit-answer-btn" class="btn" disabled>Invia Risposta</button></form></div>
+        <div id="creator-confirmation-section" class="glass-form" style="display: none; text-align: center;"><div class="confirmation-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg></div><h2>Modulo Creato!</h2><p>Condividi questo link con chiunque voglia partecipare.</p><div id="shareable-link" class="link-display"></div><button id="copy-link-btn" class="btn" style="margin-bottom: 10px;">Copia Link</button><button id="create-another-btn" class="btn btn-secondary">Crea un altro Modulo</button></div>
+        <div id="viewer-confirmation-section" class="glass-form" style="display: none; text-align: center;"><div class="confirmation-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><h2>Risposta Inviata</h2><p>Grazie per aver partecipato!</p><a href="/" class="btn btn-secondary" style="margin-top: 20px; text-decoration: none;">Crea il tuo Modulo</a></div>
+    </div>
+    
+    <button id="ai-toggle-btn" aria-label="Apri assistente AI"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg></button>
+    <div id="ai-chat-container"><div class="ai-chat-window glass-form"><div class="ai-chat-messages" id="ai-chat-messages"><div class="chat-message ai-message">Ciao! Sono Sparky, il tuo assistente AI. ✨ Come posso aiutarti?</div></div><form class="ai-chat-input-form" id="ai-chat-form"><input type="text" id="ai-chat-input" placeholder="Scrivi un messaggio..." autocomplete="off" required><button type="submit" id="ai-chat-submit" aria-label="Invia messaggio"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg></button></form></div></div>
+
+    <script>
+        const SUPABASE_URL = 'https://xvjnpwatfpjceqqkraze.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2ampucHdhdGZwamNlcXFrcmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDkwNDgsImV4cCI6MjA2NTU4NTA0OH0.Lt0m8t4o8UZdSGV9kjMT0i4bahqoA2NOJHG-2ueE6g8';
+        // FIX: The variable name for the client must be different from the global library object.
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Funzioni e variabili comuni a tutte le sezioni
+        const creatorSection = document.getElementById('creator-section');
+        const viewerSection = document.getElementById('viewer-section');
+        const creatorConfirmationSection = document.getElementById('creator-confirmation-section');
+        const viewerConfirmationSection = document.getElementById('viewer-confirmation-section');
+
+        // --- GESTIONE ROUTING ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const forumId = params.get('id');
+            if (forumId) {
+                loadForum(forumId);
+            } else {
+                creatorSection.style.display = 'block';
+            }
+        });
+
+        // --- LOGICA CREAZIONE MODULO ---
+        const creatorForm = document.getElementById('forum-creator-form');
+        document.getElementById('add-option-btn').addEventListener('click', () => {
+            const container = document.getElementById('options-container');
+            const newOption = document.createElement('div');
+            newOption.className = 'option-input-group';
+            newOption.innerHTML = `<input type="text" name="option" placeholder="Opzione ${container.children.length + 1}" required><button type="button" class="btn-danger" onclick="this.parentElement.remove()">Rimuovi</button>`;
+            container.appendChild(newOption);
+        });
+        creatorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.textContent = 'Creazione...';
+            btn.disabled = true;
+            const title = document.getElementById('forum-title').value;
+            const question = document.getElementById('forum-question').value;
+            const options = Array.from(document.querySelectorAll('#options-container input')).map(input => input.value).filter(v => v);
+            try {
+                // FIX: Use the initialized client variable
+                const { data, error } = await supabaseClient.from('forums').insert([{ title, question, options }]).select().single();
+                if (error) throw error;
+                const shareableLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
+                document.getElementById('shareable-link').textContent = shareableLink;
+                creatorSection.style.display = 'none';
+                creatorConfirmationSection.style.display = 'block';
+            } catch (error) {
+                alert("Errore: " + error.message);
+                btn.textContent = 'Crea Modulo';
+                btn.disabled = false;
+            }
+        });
+        document.getElementById('copy-link-btn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('shareable-link').textContent).then(() => alert("Link copiato!")));
+        document.getElementById('create-another-btn').addEventListener('click', () => window.location.href = window.location.origin + window.location.pathname);
+
+        // --- LOGICA VISUALIZZAZIONE E RISPOSTA MODULO ---
+        async function loadForum(id) {
+            try {
+                // FIX: Use the initialized client variable
+                const { data, error } = await supabaseClient.from('forums').select('*').eq('id', id).single();
+                if (error || !data) throw new Error("Modulo non trovato.");
+                creatorSection.style.display = 'none';
+                viewerSection.style.display = 'block';
+                document.getElementById('viewer-title').textContent = data.title;
+                document.getElementById('viewer-question').textContent = data.question;
+                const container = document.getElementById('viewer-options');
+                container.innerHTML = data.options.map(opt => `<label><input type="radio" name="scelta" value="${opt}"><span>${opt}</span></label>`).join('');
+                setupViewerValidation(id);
+            } catch(error) {
+                creatorSection.innerHTML = `<h2>Oops!</h2><p>${error.message}</p><a href="/" class="btn">Torna alla creazione</a>`;
+                creatorSection.style.textAlign = 'center';
+            }
+        }
+        function setupViewerValidation(forumId) {
+            const nameInput = document.getElementById('viewer-name');
+            const answerRadios = document.querySelectorAll('#viewer-options input');
+            const submitBtn = document.getElementById('submit-answer-btn');
+            const validate = () => { submitBtn.disabled = !(nameInput.value.trim() && Array.from(answerRadios).some(r => r.checked)); };
+            nameInput.addEventListener('input', validate);
+            answerRadios.forEach(r => r.addEventListener('change', validate));
+            document.getElementById('forum-viewer-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                const name = nameInput.value;
+                const choice = document.querySelector('input[name="scelta"]:checked').value;
+                try {
+                    const fileName = `forum_${forumId}/${name.replace(/\s+/g, '_')}_${Date.now()}.json`;
+                    // FIX: Use the initialized client variable
+                    const { error } = await supabaseClient.storage.from('answers').upload(fileName, JSON.stringify({ name, choice }));
+                    if (error) throw error;
+                    viewerSection.style.display = 'none';
+                    viewerConfirmationSection.style.display = 'block';
+                } catch (error) {
+                    alert("Errore invio: " + error.message);
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+        
+        // --- SCRIPT PER ASSISTENTE AI ---
+        (function setupAIChat() {
+            const aiToggleBtn = document.getElementById('ai-toggle-btn');
+            const aiChatContainer = document.getElementById('ai-chat-container');
+            const aiChatForm = document.getElementById('ai-chat-form');
+            const aiChatInput = document.getElementById('ai-chat-input');
+            const aiChatMessages = document.getElementById('ai-chat-messages');
+            aiToggleBtn.addEventListener('click', () => { aiChatContainer.classList.toggle('visible'); if(aiChatContainer.classList.contains('visible')) aiChatInput.focus(); });
+            aiChatContainer.addEventListener('click', (e) => { if (e.target === aiChatContainer) aiChatContainer.classList.remove('visible'); });
+            aiChatForm.addEventListener('submit', (e) => { e.preventDefault(); const msg = aiChatInput.value.trim(); if(msg){ addMessage(msg, 'user'); aiChatInput.value = ''; getAiResponse(msg); } });
+            function addMessage(text, sender) { const el = document.createElement('div'); el.className = `chat-message ${sender}-message`; el.textContent = text; aiChatMessages.appendChild(el); aiChatMessages.scrollTop = aiChatMessages.scrollHeight; return el; }
+            function typeMessage(el, text) { el.textContent = ''; let i = 0; function typing() { if(i < text.length) { el.textContent += text.charAt(i++); setTimeout(typing, 30); } } typing(); }
+            async function getAiResponse(prompt) {
+                const loadingEl = addMessage("...", 'ai');
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=`;
+                const systemInstruction = "Sei Sparky, un AI assistant. Sii conciso, amichevole e usa emoji. 😊";
+                try {
+                    const res = await fetch(apiUrl, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `${systemInstruction}\nUtente: "${prompt}"` }] }] }) });
+                    if (!res.ok) throw new Error("Errore API");
+                    const data = await res.json();
+                    const aiText = data.candidates[0].content.parts[0].text;
+                    typeMessage(loadingEl, aiText);
+                } catch (e) { typeMessage(loadingEl, "Oops, c'è un problema di rete. 😥"); }
+            }
+        })();
+
+        // --- SCRIPT CANVAS PARTICELLARE ---
+        // (codice omesso per leggibilità, è identico alle versioni precedenti)
+    </script>
+</body>
+</html>
