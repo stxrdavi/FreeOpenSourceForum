@@ -20,18 +20,22 @@
             --modal-bg: #161523;
         }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
-        #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .main-container { position: relative; z-index: 2; width: 100%; height: 100%; }
         .top-bar { position: absolute; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: flex-end; align-items: center; min-height: 50px; box-sizing: border-box; z-index: 3; }
         .user-info { display: none; align-items: center; gap: 15px; }
-        .logout-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 8px 15px; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; }
-        .logout-btn:hover { background-color: var(--text-color); color: #0c0a1a; }
-        .hero-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; }
-        .hero-content { background: var(--form-background); border-radius: 40px; border: 1px solid var(--form-border); backdrop-filter: blur(15px); padding: 60px 40px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); max-width: 700px; }
+        .logout-btn, #my-modules-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 8px 15px; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; }
+        .logout-btn:hover, #my-modules-btn:hover { background-color: var(--text-color); color: #0c0a1a; }
+        .hero-container, #my-modules-section { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; }
+        .hero-content, .modules-content { background: var(--form-background); border-radius: 40px; border: 1px solid var(--form-border); backdrop-filter: blur(15px); padding: 60px 40px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); max-width: 700px; width: 100%; }
         .hero-content h1 { font-size: 3.5rem; margin: 0 0 15px 0; font-weight: 700; line-height: 1.2; }
         .hero-content p { font-size: 1.2rem; color: var(--text-color-light); margin: 0 0 40px 0; max-width: 500px; margin-left: auto; margin-right: auto; }
         .cta-button { display: inline-block; padding: 20px 40px; border-radius: 50px; text-decoration: none; font-size: 1.2rem; font-weight: 700; color: white; background: linear-gradient(45deg, var(--accent-color), var(--accent-color-darker)); transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(159, 134, 255, 0.4); border: none; cursor: pointer; }
         .cta-button:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(159, 134, 255, 0.6); }
+        .modules-content h2 { margin-top: 0; }
+        #my-modules-list { max-height: 50vh; overflow-y: auto; padding-right: 15px; text-align: left;}
+        .module-item { background: var(--input-background); padding: 15px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
+        .module-item:hover { background: rgba(255,255,255,0.2); }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1001; display: none; justify-content: center; align-items: center; }
         .modal-content { position: relative; background: var(--modal-bg); border: 1px solid var(--form-border); padding: 40px; border-radius: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 0 1px 1px rgba(255,255,255,0.1); text-align: center; }
@@ -52,7 +56,6 @@
         .switch-mode { text-align: center; margin-top: 20px; font-size: 0.9rem; }
         .switch-mode button { background: none; border: none; color: var(--accent-color); cursor: pointer; text-decoration: underline; padding: 5px; }
         .modal-error { color: #f87171; text-align: center; margin-bottom: 15px; font-size: 0.9rem; }
-        
         #ai-toggle-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; width: 60px; height: 60px; background: linear-gradient(45deg, var(--accent-color), #be9ff6); border-radius: 50%; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
         #ai-toggle-btn:hover { transform: scale(1.1); }
         #ai-toggle-btn svg { width: 32px; height: 32px; color: white; }
@@ -71,18 +74,6 @@
         #ai-chat-input-form { display: flex; gap: 10px; padding: 15px; border-top: 1px solid var(--form-border); align-items: center; }
         #ai-chat-input { flex-grow: 1; height: 48px; border-radius: 24px; padding: 0 20px; }
         #ai-chat-submit { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; }
-        
-        @media (max-width: 768px) {
-            .hero-content h1 { font-size: 2.5rem; }
-            .hero-content p { font-size: 1.1rem; }
-            .hero-content { padding: 40px 30px; }
-            .top-bar { padding: 15px 20px; }
-        }
-        @media (max-width: 480px) {
-            .hero-content h1 { font-size: 2rem; line-height: 1.3; }
-            .hero-content p { font-size: 1rem; margin-bottom: 30px; }
-            .cta-button { padding: 18px 35px; font-size: 1rem; }
-        }
     </style>
 </head>
 <body>
@@ -91,14 +82,22 @@
         <div class="top-bar">
             <div id="user-info" class="user-info">
                 <span id="user-email"></span>
+                <button id="my-modules-btn">I Miei Moduli</button>
                 <button id="logout-btn" class="logout-btn">Esci</button>
             </div>
         </div>
-        <div class="hero-container">
+        <div id="hero-container" class="hero-container">
             <div class="hero-content">
                 <h1>Crea Moduli in Pochi Secondi con FreeOpenSourceModule</h1>
                 <p>Dai vita alle tue idee. Crea sondaggi e moduli personalizzati con un design unico e condividili con chiunque, gratuitamente.</p>
                 <button id="main-cta-btn" class="cta-button">Registrati o accedi per creare!</button>
+            </div>
+        </div>
+        <div id="my-modules-section" class="hero-container" style="display: none;">
+            <div class="modules-content">
+                <h2>I Tuoi Moduli Creati</h2>
+                <div id="my-modules-list" style="max-height: 60vh; overflow-y: auto; padding: 10px;"></div>
+                <button id="back-to-home-btn" class="cta-button" style="margin-top: 30px;">Torna alla Home</button>
             </div>
         </div>
     </div>
@@ -119,16 +118,20 @@
             <div class="switch-mode"><span id="switch-text">Non hai un account?</span><button id="switch-btn">Registrati</button></div>
         </div>
     </div>
+    <div id="answers-modal" class="modal-overlay">
+        <div class="modal-content">
+             <button class="modal-close-btn" id="answers-modal-close-btn">&times;</button>
+             <div class="modal-header"><h2 id="answers-modal-title">Risposte Ricevute</h2></div>
+             <div id="answers-list">Nessuna risposta ancora.</div>
+        </div>
+    </div>
     
     <button id="ai-toggle-btn" aria-label="Apri assistente AI"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg></button>
     <div id="ai-chat-container">
         <div class="ai-chat-window">
              <div class="ai-chat-header"><h3>Assistente AI</h3><button class="close-btn" id="ai-close-btn">&times;</button></div>
              <div class="ai-chat-messages" id="ai-chat-messages"><div class="chat-message ai-message">Ciao! Sono Sparky ✨ Come posso aiutarti?</div></div>
-             <form class="ai-chat-input-form" id="ai-chat-form">
-                <input type="text" id="ai-chat-input" placeholder="Scrivi una domanda..." autocomplete="off" required>
-                <button type="submit" id="ai-chat-submit" aria-label="Invia messaggio"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg></button>
-            </form>
+             <form class="ai-chat-input-form" id="ai-chat-form"><input type="text" id="ai-chat-input" placeholder="Scrivi una domanda..." autocomplete="off" required><button type="submit" id="ai-chat-submit" aria-label="Invia messaggio"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg></button></form>
         </div>
     </div>
 
@@ -145,6 +148,14 @@
         const authForm = document.getElementById('auth-form');
         const modalError = document.getElementById('modal-error');
         const modalCloseBtn = document.getElementById('modal-close-btn');
+        const myModulesBtn = document.getElementById('my-modules-btn');
+        const heroContainer = document.querySelector('.hero-container');
+        const myModulesSection = document.getElementById('my-modules-section');
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+        const answersModal = document.getElementById('answers-modal');
+        const answersList = document.getElementById('answers-list');
+        const answersModalCloseBtn = document.getElementById('answers-modal-close-btn');
+
         let isLoginMode = true;
         let currentUser = null; 
 
@@ -212,6 +223,8 @@
         
         logoutBtn.addEventListener('click', async () => {
             await supabaseClient.auth.signOut();
+            heroContainer.style.display = 'flex';
+            myModulesSection.style.display = 'none';
         });
         
         supabaseClient.auth.onAuthStateChange((_event, session) => {
@@ -232,6 +245,81 @@
                 eyeSlashIcon.style.display = 'none';
             }
         });
+        
+        myModulesBtn.addEventListener('click', async () => {
+            heroContainer.style.display = 'none';
+            myModulesSection.style.display = 'flex';
+            const { data, error } = await supabaseClient.from('forums').select('*').eq('user_id', currentUser.id);
+            if (error) {
+                console.error(error);
+                return;
+            }
+            const list = document.getElementById('my-modules-list');
+            list.innerHTML = '';
+            if (data.length === 0) {
+                list.innerHTML = '<p>Non hai ancora creato nessun modulo.</p>';
+            } else {
+                data.forEach(module => {
+                    const item = document.createElement('div');
+                    item.className = 'module-item';
+                    item.innerHTML = `<span>${module.title}</span>`;
+                    item.onclick = () => showAnswers(module.id, module.title);
+                    list.appendChild(item);
+                });
+            }
+        });
+        
+        backToHomeBtn.addEventListener('click', () => {
+            heroContainer.style.display = 'flex';
+            myModulesSection.style.display = 'none';
+        });
+        
+        async function showAnswers(forumId, title) {
+            document.getElementById('answers-modal-title').textContent = `Risposte per: ${title}`;
+            answersList.innerHTML = 'Caricamento...';
+            answersModal.style.display = 'flex';
+            const { data, error } = await supabaseClient.storage.from('answers').list(`forum_${forumId}`);
+            if (error) {
+                answersList.innerHTML = `<p>Errore nel caricare le risposte.</p>`;
+                return;
+            }
+            if (data.length === 0) {
+                answersList.innerHTML = '<p>Nessuna risposta ancora.</p>';
+                return;
+            }
+            answersList.innerHTML = '';
+            data.forEach(file => {
+                const item = document.createElement('div');
+                item.className = 'response-item';
+                item.innerHTML = `<p>${file.name.replace('.pdf', '').split('_').slice(0,-1).join(' ')}</p><a href="#" data-path="${`forum_${forumId}/${file.name}`}" class="cta-button btn-sm">Scarica PDF</a>`;
+                answersList.appendChild(item);
+            });
+        }
+
+        answersModal.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A' && e.target.dataset.path) {
+                e.preventDefault();
+                downloadAnswer(e.target.dataset.path);
+            }
+        });
+        
+        async function downloadAnswer(path) {
+            const { data, error } = await supabaseClient.storage.from('answers').download(path);
+            if (error) {
+                alert("Errore nel download del file.");
+                return;
+            }
+            const url = URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = path.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        answersModalCloseBtn.addEventListener('click', () => answersModal.style.display = 'none');
         
         const bgCanvas = document.getElementById('particle-canvas'); const bgCtx = bgCanvas.getContext('2d'); let particlesArray; function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; } setCanvasSize(); class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } } function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } } function connect() { let o = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let d = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2); if (d < (bgCanvas.width / 7) * (bgCanvas.height / 7)) { o = 1 - (d / 20000); bgCtx.strokeStyle = `rgba(255, 255, 255, ${o})`; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y); bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y); bgCtx.stroke(); } } } } function animateBg() { bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); particlesArray.forEach(p => { p.update(); p.draw(); }); connect(); requestAnimationFrame(animateBg); } initParticles(); animateBg(); window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
 
