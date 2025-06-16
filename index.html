@@ -18,30 +18,47 @@
         }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: 'Poppins', sans-serif; background-color: #0c0a1a; }
         #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .main-container { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; }
-        .top-bar { padding: 20px 40px; display: flex; justify-content: flex-end; align-items: center; }
-        .login-btn { padding: 10px 25px; border-radius: 50px; text-decoration: none; font-weight: 500; color: white; background: var(--accent-color); transition: all 0.3s ease; border: none; cursor: pointer; }
-        .login-btn:hover { background: var(--accent-color-darker); }
+        .main-container { position: relative; z-index: 2; width: 100%; height: 100%; }
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            min-height: 50px;
+            box-sizing: border-box;
+            z-index: 3;
+        }
         .user-info { display: none; align-items: center; gap: 15px; color: var(--text-color); }
-        .logout-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 8px 15px; border-radius: 20px; cursor: pointer; }
-        .hero-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; }
+        .logout-btn { background: none; border: 1px solid var(--text-color); color: var(--text-color); padding: 8px 15px; border-radius: 20px; cursor: pointer; transition: all 0.2s ease; }
+        .logout-btn:hover { background-color: var(--text-color); color: #0c0a1a; }
+        .hero-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
         .hero-content { background: var(--form-background); border-radius: 40px; border: 1px solid var(--form-border); backdrop-filter: blur(15px); padding: 60px 40px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); max-width: 700px; }
         .hero-content h1 { font-size: 3.5rem; color: var(--text-color); margin: 0 0 15px 0; font-weight: 700; }
         .hero-content p { font-size: 1.2rem; color: rgba(255, 255, 255, 0.8); margin: 0 0 40px 0; max-width: 500px; margin-left: auto; margin-right: auto; }
-        .cta-button { display: inline-block; padding: 20px 40px; border-radius: 50px; text-decoration: none; font-size: 1.2rem; font-weight: 700; color: white; background: linear-gradient(45deg, var(--accent-color), var(--accent-color-darker)); transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(159, 134, 255, 0.4); }
+        .cta-button { display: inline-block; padding: 20px 40px; border-radius: 50px; text-decoration: none; font-size: 1.2rem; font-weight: 700; color: white; background: linear-gradient(45deg, var(--accent-color), var(--accent-color-darker)); transition: all 0.3s ease; box-shadow: 0 5px 20px rgba(159, 134, 255, 0.4); border: none; cursor: pointer; }
         .cta-button:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(159, 134, 255, 0.6); }
         
-        /* Stili per la modale di Login */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1001; display: none; justify-content: center; align-items: center; }
         .modal-content { background: var(--form-background); border: 1px solid var(--form-border); padding: 40px; border-radius: 25px; width: 90%; max-width: 400px; color: white; }
         .modal-content h2 { text-align: center; }
         .modal-content .form-group { margin-bottom: 20px; }
         .modal-content input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--input-border); background: var(--input-background); color: white; }
-        .modal-content .btn { margin-top: 10px; }
         .switch-mode { text-align: center; margin-top: 15px; font-size: 0.9rem; }
         .switch-mode button { background: none; border: none; color: var(--accent-color); cursor: pointer; text-decoration: underline; }
         .modal-error { color: #f87171; text-align: center; margin-bottom: 15px; font-size: 0.9rem; }
-
     </style>
 </head>
 <body>
@@ -49,7 +66,6 @@
     
     <div class="main-container">
         <div class="top-bar">
-            <button id="login-btn" class="login-btn">Accedi</button>
             <div id="user-info" class="user-info">
                 <span id="user-email"></span>
                 <button id="logout-btn" class="logout-btn">Esci</button>
@@ -59,7 +75,7 @@
             <div class="hero-content">
                 <h1>Crea Moduli in Pochi Secondi</h1>
                 <p>Dai vita alle tue idee. Crea sondaggi e moduli personalizzati con un design unico e condividili con chiunque, gratuitamente.</p>
-                <a id="cta-link" href="./crea.html" class="cta-button">Inizia a Creare Ora</a>
+                <button id="main-cta-btn" class="cta-button">Registrati o accedi per creare!</button>
             </div>
         </div>
     </div>
@@ -92,42 +108,37 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2ampucHdhdGZwamNlcXFrcmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDkwNDgsImV4cCI6MjA2NTU4NTA0OH0.Lt0m8t4o8UZdSGV9kjMT0i4bahqoA2NOJHG-2ueE6g8';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- UI Elements ---
-        const loginBtn = document.getElementById('login-btn');
+        const mainCtaBtn = document.getElementById('main-cta-btn');
         const logoutBtn = document.getElementById('logout-btn');
         const userInfo = document.getElementById('user-info');
         const userEmailSpan = document.getElementById('user-email');
         const loginModal = document.getElementById('login-modal');
         const authForm = document.getElementById('auth-form');
         const modalError = document.getElementById('modal-error');
-        const ctaLink = document.getElementById('cta-link');
         let isLoginMode = true;
         let currentUser = null; 
 
-        // --- Funzioni UI ---
         const updateUI = (user) => {
             currentUser = user; 
             if (user) {
-                loginBtn.style.display = 'none';
+                mainCtaBtn.textContent = 'Inizia a Creare Ora';
                 userInfo.style.display = 'flex';
                 userEmailSpan.textContent = user.email;
-                ctaLink.href = './crea.html'; 
             } else {
-                loginBtn.style.display = 'block';
+                mainCtaBtn.textContent = 'Registrati o accedi per creare!';
                 userInfo.style.display = 'none';
                 userEmailSpan.textContent = '';
-                ctaLink.href = '#'; 
             }
         };
 
-        // --- Gestione Modale ---
-        loginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
-        ctaLink.addEventListener('click', (e) => {
-            if (!currentUser) {
-                e.preventDefault();
+        mainCtaBtn.addEventListener('click', () => {
+            if (currentUser) {
+                window.location.href = './crea.html';
+            } else {
                 loginModal.style.display = 'flex';
             }
         });
+
         loginModal.addEventListener('click', (e) => {
             if (e.target === loginModal) loginModal.style.display = 'none';
         });
@@ -141,7 +152,6 @@
             modalError.style.display = 'none';
         });
 
-        // --- Logica di Autenticazione ---
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -154,15 +164,11 @@
                 } else {
                     response = await supabaseClient.auth.signUp({ email, password });
                 }
-                
                 if (response.error) throw response.error;
-                
                 loginModal.style.display = 'none';
                 authForm.reset();
-
             } catch (error) {
                 console.error("Authentication error:", error);
-                // FIX: Provide a more helpful error message for network failures
                 if (error.message === 'Failed to fetch') {
                     modalError.textContent = "Errore di rete. Controlla la tua connessione o disabilita eventuali ad-blocker e riprova.";
                 } else {
@@ -176,7 +182,6 @@
             await supabaseClient.auth.signOut();
         });
         
-        // Ascolta i cambiamenti di stato
         supabaseClient.auth.onAuthStateChange((_event, session) => {
             updateUI(session?.user);
         });
