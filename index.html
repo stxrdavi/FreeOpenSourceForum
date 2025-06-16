@@ -18,9 +18,10 @@
             --input-background: rgba(255, 255, 255, 0.1);
             --input-border: rgba(255, 255, 255, 0.3);
             --modal-bg: #161523;
+            --danger-color: #fb7185;
         }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-color); }
-        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #particle-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
         .main-container { position: relative; z-index: 2; width: 100%; height: 100%; }
         .top-bar { position: absolute; top: 0; left: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: flex-end; align-items: center; min-height: 50px; box-sizing: border-box; z-index: 3; }
         .user-info { display: none; align-items: center; gap: 15px; }
@@ -34,8 +35,11 @@
         .cta-button:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(159, 134, 255, 0.6); }
         .modules-content h2 { margin-top: 0; }
         #my-modules-list { max-height: 50vh; overflow-y: auto; padding-right: 15px; text-align: left;}
-        .module-item { background: var(--input-background); padding: 15px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: background 0.2s; }
-        .module-item:hover { background: rgba(255,255,255,0.2); }
+        .module-item { background: var(--input-background); padding: 15px 20px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .module-item-title { flex-grow: 1; cursor: pointer; }
+        .module-item-title:hover { color: var(--accent-color); }
+        .delete-btn { background: none; border: none; color: var(--danger-color); cursor: pointer; font-size: 0.9rem; font-weight: 700; padding: 5px 10px;}
+        .delete-btn:hover { text-decoration: underline; }
         
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1001; display: none; justify-content: center; align-items: center; }
         .modal-content { position: relative; background: var(--modal-bg); border: 1px solid var(--form-border); padding: 40px; border-radius: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 0 1px 1px rgba(255,255,255,0.1); text-align: center; }
@@ -74,6 +78,11 @@
         #ai-chat-input-form { display: flex; gap: 10px; padding: 15px; border-top: 1px solid var(--form-border); align-items: center; }
         #ai-chat-input { flex-grow: 1; height: 48px; border-radius: 24px; padding: 0 20px; }
         #ai-chat-submit { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; }
+        #answers-modal .modal-content { max-width: 700px; text-align: left; }
+        #answers-list { max-height: 60vh; overflow-y: auto; padding-right: 15px; }
+        .response-item { border-bottom: 1px solid var(--form-border); padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+        .response-item p { margin: 0; }
+        .response-item .cta-button { font-size: 0.9rem; padding: 8px 15px; }
     </style>
 </head>
 <body>
@@ -96,8 +105,8 @@
         <div id="my-modules-section" class="hero-container" style="display: none;">
             <div class="modules-content">
                 <h2>I Tuoi Moduli Creati</h2>
-                <div id="my-modules-list" style="max-height: 60vh; overflow-y: auto; padding: 10px;"></div>
-                <button id="back-to-home-btn" class="cta-button" style="margin-top: 30px;">Torna alla Home</button>
+                <div id="my-modules-list"></div>
+                <a href="#" id="back-to-home-btn" class="cta-button" style="margin-top: 30px;">Torna alla Home</a>
             </div>
         </div>
     </div>
@@ -125,7 +134,6 @@
              <div id="answers-list">Nessuna risposta ancora.</div>
         </div>
     </div>
-    
     <button id="ai-toggle-btn" aria-label="Apri assistente AI"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg></button>
     <div id="ai-chat-container">
         <div class="ai-chat-window">
@@ -134,239 +142,243 @@
              <form class="ai-chat-input-form" id="ai-chat-form"><input type="text" id="ai-chat-input" placeholder="Scrivi una domanda..." autocomplete="off" required><button type="submit" id="ai-chat-submit" aria-label="Invia messaggio"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg></button></form>
         </div>
     </div>
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="confirm-modal-title">Conferma Eliminazione</h2>
+            <p id="confirm-modal-text">Sei sicuro di voler eliminare questo modulo? L'azione è irreversibile e cancellerà anche tutte le risposte.</p>
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: center;">
+                <button id="confirm-delete-btn" class="cta-button" style="background: var(--danger-color);">Sì, Elimina</button>
+                <button id="cancel-delete-btn" class="cta-button" style="background: var(--input-background); color: white;">Annulla</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://xvjjnpwatfpjceqqkraz.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2ampucHdhdGZwamNlcXFrcmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDkwNDgsImV4cCI6MjA2NTU4NTA0OH0.Lt0m8t4o8UZdSGV9kjMT0i4bahqoA2NOJHG-2ueE6g8';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const mainCtaBtn = document.getElementById('main-cta-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userInfo = document.getElementById('user-info');
-        const userEmailSpan = document.getElementById('user-email');
-        const loginModal = document.getElementById('login-modal');
-        const authForm = document.getElementById('auth-form');
-        const modalError = document.getElementById('modal-error');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
-        const myModulesBtn = document.getElementById('my-modules-btn');
-        const heroContainer = document.querySelector('.hero-container');
-        const myModulesSection = document.getElementById('my-modules-section');
-        const backToHomeBtn = document.getElementById('back-to-home-btn');
-        const answersModal = document.getElementById('answers-modal');
-        const answersList = document.getElementById('answers-list');
-        const answersModalCloseBtn = document.getElementById('answers-modal-close-btn');
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainCtaBtn = document.getElementById('main-cta-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const userInfo = document.getElementById('user-info');
+            const userEmailSpan = document.getElementById('user-email');
+            const loginModal = document.getElementById('login-modal');
+            const authForm = document.getElementById('auth-form');
+            const modalError = document.getElementById('modal-error');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const myModulesBtn = document.getElementById('my-modules-btn');
+            const heroContainer = document.getElementById('hero-container');
+            const myModulesSection = document.getElementById('my-modules-section');
+            const backToHomeBtn = document.getElementById('back-to-home-btn');
+            const answersModal = document.getElementById('answers-modal');
+            const answersList = document.getElementById('answers-list');
+            const answersModalCloseBtn = document.getElementById('answers-modal-close-btn');
+            let isLoginMode = true;
+            let currentUser = null;
 
-        let isLoginMode = true;
-        let currentUser = null; 
-
-        const updateUI = (user) => {
-            currentUser = user; 
-            if (user) {
-                mainCtaBtn.textContent = 'Inizia a Creare Ora';
-                userInfo.style.display = 'flex';
-                userEmailSpan.textContent = user.email;
-            } else {
-                mainCtaBtn.textContent = 'Registrati o accedi per creare!';
-                userInfo.style.display = 'none';
-                userEmailSpan.textContent = '';
-            }
-        };
-
-        mainCtaBtn.addEventListener('click', () => {
-            if (currentUser) {
-                window.location.href = './crea.html';
-            } else {
-                loginModal.style.display = 'flex';
-            }
-        });
-
-        loginModal.addEventListener('click', (e) => {
-            if (e.target === loginModal) loginModal.style.display = 'none';
-        });
-        modalCloseBtn.addEventListener('click', () => loginModal.style.display = 'none');
-        
-        document.getElementById('switch-btn').addEventListener('click', () => {
-            isLoginMode = !isLoginMode;
-            document.getElementById('modal-title').textContent = isLoginMode ? 'Accedi' : 'Registrati';
-            document.getElementById('modal-subtitle').textContent = isLoginMode ? 'Bentornato! Inserisci le tue credenziali.' : 'Crea un nuovo account per iniziare.';
-            document.getElementById('auth-btn').textContent = isLoginMode ? 'Accedi' : 'Registrati';
-            document.getElementById('switch-text').textContent = isLoginMode ? 'Non hai un account?' : 'Hai già un account?';
-            document.getElementById('switch-btn').textContent = isLoginMode ? 'Registrati' : 'Accedi';
-            modalError.style.display = 'none';
-        });
-
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            modalError.style.display = 'none';
-            let response;
-            try {
-                if (isLoginMode) {
-                    response = await supabaseClient.auth.signInWithPassword({ email, password });
+            const updateUI = (user) => {
+                currentUser = user;
+                if (user) {
+                    mainCtaBtn.textContent = 'Inizia a Creare Ora';
+                    userInfo.style.display = 'flex';
+                    userEmailSpan.textContent = user.email;
                 } else {
-                    response = await supabaseClient.auth.signUp({ email, password });
+                    mainCtaBtn.textContent = 'Registrati o accedi per creare!';
+                    userInfo.style.display = 'none';
+                    myModulesSection.style.display = 'none';
+                    heroContainer.style.display = 'flex';
                 }
-                if (response.error) throw response.error;
-                loginModal.style.display = 'none';
-                authForm.reset();
-            } catch (error) {
-                console.error("Authentication error:", error);
-                if (error instanceof TypeError && error.message.toLowerCase().includes('failed to fetch')) {
-                    modalError.textContent = "Errore di connessione di rete. Controlla la tua connessione e riprova.";
+            };
+
+            mainCtaBtn.addEventListener('click', () => {
+                if (currentUser) {
+                    window.location.href = './crea.html';
                 } else {
-                    modalError.textContent = error.message;
+                    loginModal.style.display = 'flex';
                 }
-                modalError.style.display = 'block';
-            }
-        });
-        
-        logoutBtn.addEventListener('click', async () => {
-            await supabaseClient.auth.signOut();
-            heroContainer.style.display = 'flex';
-            myModulesSection.style.display = 'none';
-        });
-        
-        supabaseClient.auth.onAuthStateChange((_event, session) => {
-            updateUI(session?.user);
-        });
-        
-        document.getElementById('toggle-password').addEventListener('click', function() {
-            const passwordInput = document.getElementById('password');
-            const eyeIcon = this.querySelector('.eye-icon');
-            const eyeSlashIcon = this.querySelector('.eye-slash-icon');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                eyeIcon.style.display = 'none';
-                eyeSlashIcon.style.display = 'block';
-            } else {
-                passwordInput.type = 'password';
-                eyeIcon.style.display = 'block';
-                eyeSlashIcon.style.display = 'none';
-            }
-        });
-        
-        myModulesBtn.addEventListener('click', async () => {
-            heroContainer.style.display = 'none';
-            myModulesSection.style.display = 'flex';
-            const { data, error } = await supabaseClient.from('forums').select('*').eq('user_id', currentUser.id);
-            if (error) {
-                console.error(error);
-                return;
-            }
-            const list = document.getElementById('my-modules-list');
-            list.innerHTML = '';
-            if (data.length === 0) {
-                list.innerHTML = '<p>Non hai ancora creato nessun modulo.</p>';
-            } else {
-                data.forEach(module => {
-                    const item = document.createElement('div');
-                    item.className = 'module-item';
-                    item.innerHTML = `<span>${module.title}</span>`;
-                    item.onclick = () => showAnswers(module.id, module.title);
-                    list.appendChild(item);
-                });
-            }
-        });
-        
-        backToHomeBtn.addEventListener('click', () => {
-            heroContainer.style.display = 'flex';
-            myModulesSection.style.display = 'none';
-        });
-        
-        async function showAnswers(forumId, title) {
-            document.getElementById('answers-modal-title').textContent = `Risposte per: ${title}`;
-            answersList.innerHTML = 'Caricamento...';
-            answersModal.style.display = 'flex';
-            const { data, error } = await supabaseClient.storage.from('answers').list(`forum_${forumId}`);
-            if (error) {
-                answersList.innerHTML = `<p>Errore nel caricare le risposte.</p>`;
-                return;
-            }
-            if (data.length === 0) {
-                answersList.innerHTML = '<p>Nessuna risposta ancora.</p>';
-                return;
-            }
-            answersList.innerHTML = '';
-            data.forEach(file => {
-                const item = document.createElement('div');
-                item.className = 'response-item';
-                item.innerHTML = `<p>${file.name.replace('.pdf', '').split('_').slice(0,-1).join(' ')}</p><a href="#" data-path="${`forum_${forumId}/${file.name}`}" class="cta-button btn-sm">Scarica PDF</a>`;
-                answersList.appendChild(item);
             });
-        }
 
-        answersModal.addEventListener('click', (e) => {
-            if (e.target.tagName === 'A' && e.target.dataset.path) {
+            loginModal.addEventListener('click', (e) => {
+                if (e.target === loginModal) loginModal.style.display = 'none';
+            });
+            modalCloseBtn.addEventListener('click', () => loginModal.style.display = 'none');
+
+            document.getElementById('switch-btn').addEventListener('click', () => {
+                isLoginMode = !isLoginMode;
+                document.getElementById('modal-title').textContent = isLoginMode ? 'Accedi' : 'Registrati';
+                document.getElementById('modal-subtitle').textContent = isLoginMode ? 'Bentornato! Inserisci le tue credenziali.' : 'Crea un nuovo account per iniziare.';
+                document.getElementById('auth-btn').textContent = isLoginMode ? 'Accedi' : 'Registrati';
+                document.getElementById('switch-text').textContent = isLoginMode ? 'Non hai un account?' : 'Hai già un account?';
+                document.getElementById('switch-btn').textContent = isLoginMode ? 'Registrati' : 'Accedi';
+                modalError.style.display = 'none';
+            });
+
+            authForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                downloadAnswer(e.target.dataset.path);
-            }
-        });
-        
-        async function downloadAnswer(path) {
-            const { data, error } = await supabaseClient.storage.from('answers').download(path);
-            if (error) {
-                alert("Errore nel download del file.");
-                return;
-            }
-            const url = URL.createObjectURL(data);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = path.split('/').pop();
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-        
-        answersModalCloseBtn.addEventListener('click', () => answersModal.style.display = 'none');
-        
-        const bgCanvas = document.getElementById('particle-canvas'); const bgCtx = bgCanvas.getContext('2d'); let particlesArray; function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; } setCanvasSize(); class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } } function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } } function connect() { let o = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let d = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2); if (d < (bgCanvas.width / 7) * (bgCanvas.height / 7)) { o = 1 - (d / 20000); bgCtx.strokeStyle = `rgba(255, 255, 255, ${o})`; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y); bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y); bgCtx.stroke(); } } } } function animateBg() { bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); particlesArray.forEach(p => { p.update(); p.draw(); }); connect(); requestAnimationFrame(animateBg); } initParticles(); animateBg(); window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
-
-        let keySequence = '';
-        const cheatCode = 'mobiletest';
-        document.addEventListener('keydown', (e) => {
-            keySequence += e.key.toLowerCase();
-            if (keySequence.length > cheatCode.length) {
-                keySequence = keySequence.slice(-cheatCode.length);
-            }
-            if (keySequence === cheatCode) {
-                document.querySelector('.main-container').classList.toggle('mobile-view');
-                keySequence = '';
-            }
-        });
-        
-        function setupAIChat() {
-            const aiToggleBtn = document.getElementById('ai-toggle-btn');
-            const aiChatContainer = document.getElementById('ai-chat-container');
-            const aiChatForm = document.getElementById('ai-chat-form');
-            const aiChatInput = document.getElementById('ai-chat-input');
-            const aiChatMessages = document.getElementById('ai-chat-messages');
-            const aiCloseBtn = document.getElementById('ai-close-btn');
-
-            if(aiToggleBtn) aiToggleBtn.addEventListener('click', () => { aiChatContainer.classList.add('visible'); aiChatInput.focus(); });
-            if(aiCloseBtn) aiCloseBtn.addEventListener('click', () => aiChatContainer.classList.remove('visible'));
-            if(aiChatContainer) aiChatContainer.addEventListener('click', (e) => { if (e.target === aiChatContainer) aiChatContainer.classList.remove('visible'); });
-            if(aiChatForm) aiChatForm.addEventListener('submit', (e) => { e.preventDefault(); const msg = aiChatInput.value.trim(); if(msg){ addMessage(msg, 'user'); aiChatInput.value = ''; getAiResponse(msg); } });
-            
-            function addMessage(text, sender) { const el = document.createElement('div'); el.className = `chat-message ${sender}-message`; el.textContent = text; aiChatMessages.appendChild(el); aiChatMessages.scrollTop = aiChatMessages.scrollHeight; return el; }
-            function typeMessage(el, text) { el.textContent = ''; let i = 0; function typing() { if(i < text.length) { el.textContent += text.charAt(i++); setTimeout(typing, 30); } } typing(); }
-            
-            async function getAiResponse(prompt) {
-                const loadingEl = addMessage("...", 'ai');
-                const apiKey = "AIzaSyCyllM7dVlaX0jwRAt8cjIypCpF3u3uBBc";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                const systemInstruction = "Sei Sparky, un assistente AI per il sito FreeOpenSourceModule. Il tuo unico scopo è aiutare gli utenti a capire come usare il sito per creare e rispondere ai moduli. Rispondi SOLO a domande relative a queste funzionalità. Se ti viene chiesto altro, come chi ti ha creato o argomenti non pertinenti, rispondi gentilmente che non puoi fornire quel tipo di informazione. Sii conciso, amichevole e usa emoji. 😊";
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                modalError.style.display = 'none';
+                let response;
                 try {
-                    const res = await fetch(apiUrl, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `${systemInstruction}\nUtente: "${prompt}"` }] }] }) });
-                    if (!res.ok) throw new Error("Errore API");
-                    const data = await res.json();
-                    const aiText = data.candidates[0].content.parts[0].text;
-                    typeMessage(loadingEl, aiText);
-                } catch (e) { typeMessage(loadingEl, "Oops, c'è un problema di rete. 😥"); }
+                    if (isLoginMode) {
+                        response = await supabaseClient.auth.signInWithPassword({ email, password });
+                    } else {
+                        response = await supabaseClient.auth.signUp({ email, password });
+                    }
+                    if (response.error) throw response.error;
+                    loginModal.style.display = 'none';
+                    authForm.reset();
+                } catch (error) {
+                    console.error("Authentication error:", error);
+                    if (error instanceof TypeError && error.message.toLowerCase().includes('failed to fetch')) {
+                        modalError.textContent = "Errore di connessione di rete. Controlla la tua connessione e riprova.";
+                    } else {
+                        modalError.textContent = error.message;
+                    }
+                    modalError.style.display = 'block';
+                }
+            });
+
+            logoutBtn.addEventListener('click', async () => {
+                await supabaseClient.auth.signOut();
+            });
+
+            supabaseClient.auth.onAuthStateChange((_event, session) => {
+                updateUI(session?.user);
+            });
+
+            document.getElementById('toggle-password').addEventListener('click', function() {
+                const passwordInput = document.getElementById('password');
+                const eyeIcon = this.querySelector('.eye-icon');
+                const eyeSlashIcon = this.querySelector('.eye-slash-icon');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIcon.style.display = 'none';
+                    eyeSlashIcon.style.display = 'block';
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIcon.style.display = 'block';
+                    eyeSlashIcon.style.display = 'none';
+                }
+            });
+            
+            myModulesBtn.addEventListener('click', async () => {
+                heroContainer.style.display = 'none';
+                myModulesSection.style.display = 'flex';
+                await loadMyModules();
+            });
+            
+            backToHomeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                heroContainer.style.display = 'flex';
+                myModulesSection.style.display = 'none';
+            });
+            
+            document.getElementById('my-modules-list').addEventListener('click', (e) => {
+                const confirmModal = document.getElementById('confirm-modal');
+                const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+                const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+                
+                if (e.target.classList.contains('delete-btn')) {
+                    const moduleId = e.target.dataset.id;
+                    confirmModal.style.display = 'flex';
+
+                    confirmDeleteBtn.onclick = async () => {
+                        await deleteModule(moduleId);
+                        confirmModal.style.display = 'none';
+                    };
+                    cancelDeleteBtn.onclick = () => {
+                        confirmModal.style.display = 'none';
+                    };
+                } else if (e.target.classList.contains('module-item-title')) {
+                     window.location.href = `./crea.html?id=${e.target.dataset.id}`;
+                }
+            });
+
+            async function deleteModule(moduleId) {
+                try {
+                    const { data: files, error: listError } = await supabaseClient.storage.from('answers').list(`forum_${moduleId}`);
+                    if (listError) throw listError;
+                    
+                    if (files.length > 0) {
+                        const filePaths = files.map(file => `forum_${moduleId}/${file.name}`);
+                        const { error: removeError } = await supabaseClient.storage.from('answers').remove(filePaths);
+                        if (removeError) throw removeError;
+                    }
+                    
+                    const { error: dbError } = await supabaseClient.from('forums').delete().eq('id', moduleId);
+                    if (dbError) throw dbError;
+                    
+                    await loadMyModules();
+                    alert("Modulo eliminato con successo!");
+                } catch (error) {
+                    console.error("Errore eliminazione modulo:", error);
+                    alert(`Errore: ${error.message}`);
+                }
             }
-        }
-        setupAIChat();
+
+            async function loadMyModules() {
+                const { data, error } = await supabaseClient.from('forums').select('*').eq('user_id', currentUser.id);
+                const list = document.getElementById('my-modules-list');
+                list.innerHTML = '';
+                 if (data && data.length > 0) {
+                    data.forEach(module => {
+                        const item = document.createElement('div');
+                        item.className = 'module-item';
+                        item.innerHTML = `<span class="module-item-title" data-id="${module.id}">${module.title}</span><button class="delete-btn" data-id="${module.id}">Elimina</button>`;
+                        list.appendChild(item);
+                    });
+                } else {
+                     list.innerHTML = '<p>Non hai ancora creato nessun modulo.</p>';
+                }
+            }
+            
+            const bgCanvas = document.getElementById('particle-canvas');
+            const bgCtx = bgCanvas.getContext('2d');
+            let particlesArray;
+            function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+            class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } }
+            function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } }
+            function connect() { let o = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let d = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2); if (d < (bgCanvas.width / 7) * (bgCanvas.height / 7)) { o = 1 - (d / 20000); bgCtx.strokeStyle = `rgba(255, 255, 255, ${o})`; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y); bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y); bgCtx.stroke(); } } } }
+            function animateBg() { bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); particlesArray.forEach(p => { p.update(); p.draw(); }); connect(); requestAnimationFrame(animateBg); }
+            setCanvasSize();
+            initParticles();
+            animateBg();
+            window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
+    
+            function setupAIChat() {
+                const aiToggleBtn = document.getElementById('ai-toggle-btn');
+                const aiChatContainer = document.getElementById('ai-chat-container');
+                const aiChatForm = document.getElementById('ai-chat-form');
+                const aiChatInput = document.getElementById('ai-chat-input');
+                const aiChatMessages = document.getElementById('ai-chat-messages');
+                const aiCloseBtn = document.getElementById('ai-close-btn');
+    
+                if(aiToggleBtn) aiToggleBtn.addEventListener('click', () => { aiChatContainer.classList.add('visible'); aiChatInput.focus(); });
+                if(aiCloseBtn) aiCloseBtn.addEventListener('click', () => aiChatContainer.classList.remove('visible'));
+                if(aiChatContainer) aiChatContainer.addEventListener('click', (e) => { if (e.target === aiChatContainer) aiChatContainer.classList.remove('visible'); });
+                if(aiChatForm) aiChatForm.addEventListener('submit', (e) => { e.preventDefault(); const msg = aiChatInput.value.trim(); if(msg){ addMessage(msg, 'user'); aiChatInput.value = ''; getAiResponse(msg); } });
+                
+                function addMessage(text, sender) { const el = document.createElement('div'); el.className = `chat-message ${sender}-message`; el.textContent = text; aiChatMessages.appendChild(el); aiChatMessages.scrollTop = aiChatMessages.scrollHeight; return el; }
+                function typeMessage(el, text) { el.textContent = ''; let i = 0; function typing() { if(i < text.length) { el.textContent += text.charAt(i++); setTimeout(typing, 30); } } typing(); }
+                
+                async function getAiResponse(prompt) {
+                    const loadingEl = addMessage("...", 'ai');
+                    const apiKey = "AIzaSyCyllM7dVlaX0jwRAt8cjIypCpF3u3uBBc";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const systemInstruction = "Sei Sparky, un assistente AI per il sito FreeOpenSourceModule. Il tuo unico scopo è aiutare gli utenti a capire come usare il sito per creare e rispondere ai moduli. Rispondi SOLO a domande relative a queste funzionalità. Se ti viene chiesto altro, come chi ti ha creato o argomenti non pertinenti, rispondi gentilmente che non puoi fornire quel tipo di informazione. Sii conciso, amichevole e usa emoji. 😊";
+                    try {
+                        const res = await fetch(apiUrl, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `${systemInstruction}\nUtente: "${prompt}"` }] }] }) });
+                        if (!res.ok) throw new Error("Errore API");
+                        const data = await res.json();
+                        const aiText = data.candidates[0].content.parts[0].text;
+                        typeMessage(loadingEl, aiText);
+                    } catch (e) { typeMessage(loadingEl, "Oops, c'è un problema di rete. 😥"); }
+                }
+            }
+            setupAIChat();
+        });
     </script>
 </body>
 </html>
