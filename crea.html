@@ -28,13 +28,18 @@
         .container { position: relative; z-index: 2; width: 100%; min-height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; transition: all 0.5s ease-in-out; }
         .glass-form { width: 100%; max-width: 600px; background: var(--form-background); border-radius: 40px; border: 1px solid var(--form-border); backdrop-filter: blur(15px) saturate(150%); -webkit-backdrop-filter: blur(15px) saturate(150%); padding: 40px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); transition: opacity 0.5s ease-out; }
         .form-header h1, .form-header h2 { margin: 0 0 20px 0; font-weight: 700; text-align: center; }
+        .form-header h1 { font-size: 2.5rem; }
+        .form-header h2 { font-size: 2rem; }
         .form-group { margin-bottom: 25px; }
         .form-group label { display: block; margin-bottom: 10px; font-weight: 500; }
         .label-sm { font-size:0.9em !important; color: var(--text-color-light) !important; }
         input[type="text"], input[type="email"], input[type="password"] { width: 100%; height: 50px; padding: 0 20px; box-sizing: border-box; background: var(--input-background); border: 1px solid var(--input-border); border-radius: 20px; color: var(--text-color); font-size: 1rem; }
         input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 15px rgba(159, 134, 255, 0.5); }
-        .radio-group label { display: flex; align-items: center; padding: 15px; margin-bottom: 10px; background: var(--input-background); border: 1px solid var(--input-border); border-radius: 20px; cursor: pointer; transition: all 0.3s ease; color: var(--text-color); }
+        .radio-group label { display: flex; align-items: center; padding: 0; margin-bottom: 10px; background: none; border: none; }
         .radio-group input[type="radio"] { display: none; }
+        #viewer-section .radio-group span { display: block; width: 100%; text-align: left; padding: 15px 20px; background: var(--input-background); border: 2px solid var(--input-border); border-radius: 15px; transition: all 0.2s ease; cursor: pointer; }
+        #viewer-section .radio-group label:hover span { border-color: var(--accent-color); }
+        #viewer-section .radio-group input[type="radio"]:checked + span { background: rgba(159, 134, 255, 0.2); border-color: var(--accent-color); color: white; font-weight: 500; }
         .btn { width: 100%; padding: 18px; border-radius: 20px; background: var(--button-background); color: var(--button-text); font-size: 1.1rem; font-weight: 700; cursor: pointer; border: none; }
         .btn:hover:not(:disabled) { background: #f0f0f0; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
         .btn:disabled { background-color: rgba(255, 255, 255, 0.5); color: rgba(0,0,0,0.4); cursor: not-allowed; transform: none; box-shadow: none; }
@@ -59,6 +64,24 @@
         .password-toggle-btn { position: absolute; top: 50%; right: 1px; transform: translateY(-50%); height: 48px; width: 48px; background: none; border: none; cursor: pointer; color: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: center; }
         .password-toggle-btn:hover { color: white; }
         .password-toggle-btn svg { width: 22px; height: 22px; }
+        #ai-toggle-btn { position: fixed; bottom: 30px; right: 30px; z-index: 1000; width: 60px; height: 60px; background: linear-gradient(45deg, var(--accent-color), #be9ff6); border-radius: 50%; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease; }
+        #ai-toggle-btn:hover { transform: scale(1.1); }
+        #ai-toggle-btn svg { width: 32px; height: 32px; color: white; }
+        #ai-chat-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 999; display: flex; justify-content: flex-end; align-items: flex-end; padding: 20px; box-sizing: border-box; background: rgba(0,0,0,0.4); opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; backdrop-filter: blur(5px); }
+        #ai-chat-container.visible { opacity: 1; visibility: visible; }
+        .ai-chat-window { width: 100%; max-width: 400px; height: 80%; max-height: 600px; display: flex; flex-direction: column; background: var(--form-background); border-radius: 25px; border: 1px solid var(--form-border); box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37); transform: translateY(20px); transition: transform 0.4s ease, opacity 0.4s ease; opacity: 0; }
+        #ai-chat-container.visible .ai-chat-window { transform: translateY(0); opacity: 1; }
+        .ai-chat-header { padding: 20px; border-bottom: 1px solid var(--form-border); display: flex; justify-content: space-between; align-items: center; }
+        .ai-chat-header h3 { margin: 0; font-weight: 500; }
+        .ai-chat-header .close-btn { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 5px; font-size: 1.5rem; }
+        .ai-chat-header .close-btn:hover { color: white; }
+        .ai-chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .chat-message { padding: 10px 15px; border-radius: 18px; max-width: 80%; line-height: 1.6; }
+        .user-message { background: var(--accent-color); align-self: flex-end; border-bottom-right-radius: 5px; color: white; }
+        .ai-message { background: rgba(255, 255, 255, 0.2); align-self: flex-start; border-bottom-left-radius: 5px; }
+        #ai-chat-input-form { display: flex; gap: 10px; padding: 15px; border-top: 1px solid var(--form-border); align-items: center; }
+        #ai-chat-input { flex-grow: 1; height: 48px; border-radius: 24px; padding: 0 20px; }
+        #ai-chat-submit { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 1001; display: none; justify-content: center; align-items: center; }
         .modal-content { position: relative; background: var(--modal-bg); border: 1px solid var(--form-border); padding: 40px; border-radius: 25px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align: center; }
         .modal-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: rgba(255,255,255,0.6); font-size: 1.5rem; cursor: pointer; }
@@ -73,10 +96,6 @@
         .switch-mode { text-align: center; margin-top: 20px; font-size: 0.9rem; }
         .switch-mode button { background: none; border: none; color: var(--accent-color); cursor: pointer; text-decoration: underline; padding: 5px; }
         .modal-error { color: #f87171; text-align: center; margin-bottom: 15px; font-size: 0.9rem; }
-        
-        #ai-toggle-btn, #ai-chat-container { /* ...omesso */ }
-        .mobile-view { max-width: 400px !important; height: 85vh; margin: 2.5vh auto !important; border: 8px solid #333; border-radius: 40px; overflow-y: auto !important; overflow-x: hidden !important; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.5); background-color: var(--bg-color); }
-        .mobile-view .glass-form { height: 100%; max-width: 100%; border-radius: 32px; }
     </style>
 </head>
 <body>
@@ -104,7 +123,6 @@
                     <div class="form-header"><h2 id="viewer-title"></h2></div>
                     <div class="form-group"><label for="viewer-name">Il tuo Nome</label><input type="text" id="viewer-name" placeholder="Inserisci il tuo nome" required></div>
                     <div id="viewer-questions-container"></div>
-                    <button type="button" id="view-answers-btn" class="btn btn-secondary" style="display: none; margin-bottom: 10px;">Vedi Risposte</button>
                     <button type="submit" id="submit-answer-btn" class="btn" disabled>Invia Risposte</button>
                     <div id="viewer-error-message" class="error-message"></div>
                 </form>
@@ -112,8 +130,8 @@
             <div id="creator-confirmation-section" class="glass-form" style="display: none; text-align: center;">
                 <div class="confirmation-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg></div>
                 <h2>Modulo Creato!</h2>
-                <div style="text-align: left; margin-top: 25px;"><label>Link di Condivisione</label><div id="shareable-link" class="link-display"></div><button id="copy-share-link-btn" class="btn btn-sm">Copia Link</button></div>
-                <div style="text-align: left; margin-top: 25px;"><label>Link Risposte</label><div id="answers-link" class="link-display"></div></div>
+                <div style="text-align: left; margin-top: 25px;"><label>Link di Condivisione (per i partecipanti)</label><div id="shareable-link" class="link-display"></div><button id="copy-share-link-btn" class="btn btn-sm">Copia Link</button></div>
+                <div style="text-align: left; margin-top: 25px;"><label>Link Risposte (solo per te)</label><div id="answers-link" class="link-display"></div><button id="copy-answers-link-btn" class="btn btn-sm">Copia Link</button></div>
                 <button id="create-another-btn" class="btn btn-secondary" style="margin-top: 30px;">Crea un altro Modulo</button>
             </div>
             <div id="viewer-confirmation-section" class="glass-form" style="display: none; text-align: center;"><div class="confirmation-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div><h2>Risposta Inviata</h2><p>Grazie per aver partecipato!</p><a href="/" class="btn btn-secondary" style="margin-top: 20px; text-decoration: none;">Crea il tuo Modulo</a></div>
@@ -150,311 +168,304 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh2ampucHdhdGZwamNlcXFrcmF6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwMDkwNDgsImV4cCI6MjA2NTU4NTA0OH0.Lt0m8t4o8UZdSGV9kjMT0i4bahqoA2NOJHG-2ueE6g8';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const mainContent = document.getElementById('main-content');
-        const authRequiredMessage = document.getElementById('auth-required');
-        const creatorSection = document.getElementById('creator-section');
-        const viewerSection = document.getElementById('viewer-section');
-        const creatorConfirmationSection = document.getElementById('creator-confirmation-section');
-        const viewerConfirmationSection = document.getElementById('viewer-confirmation-section');
-        const questionsContainer = document.getElementById('questions-container');
-        const questionTemplate = questionsContainer.firstElementChild.cloneNode(true);
-        
-        function setupCanvas() {
-            const bgCanvas = document.getElementById('particle-canvas');
-            const bgCtx = bgCanvas.getContext('2d');
-            let particlesArray;
-            function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
-            class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } }
-            function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } }
-            function connect() { let o = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let d = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2); if (d < (bgCanvas.width / 7) * (bgCanvas.height / 7)) { o = 1 - (d / 20000); bgCtx.strokeStyle = `rgba(255, 255, 255, ${o})`; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y); bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y); bgCtx.stroke(); } } } }
-            function animateBg() { bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); particlesArray.forEach(p => { p.update(); p.draw(); }); connect(); requestAnimationFrame(animateBg); }
-            setCanvasSize();
-            initParticles();
-            animateBg();
-            window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
-        }
-        
         document.addEventListener('DOMContentLoaded', () => {
-            setupCanvas();
-            setupAIChat();
-            setupLoginModal();
-            
-            supabaseClient.auth.onAuthStateChange((_event, session) => {
-                const user = session?.user;
-                if (user) {
-                    mainContent.style.display = 'flex';
-                    authRequiredMessage.style.display = 'none';
-                    const params = new URLSearchParams(window.location.search);
-                    const forumId = params.get('id');
-                    if (forumId) {
-                        loadForum(forumId, user);
-                    } else {
-                        creatorSection.style.display = 'block';
-                        viewerSection.style.display = 'none';
-                        creatorConfirmationSection.style.display = 'none';
-                        viewerConfirmationSection.style.display = 'none';
-                        setupCreatorEventListeners(user);
-                    }
-                } else {
-                    mainContent.style.display = 'none';
-                    authRequiredMessage.style.display = 'block';
-                }
-            });
-        });
+            const mainContent = document.getElementById('main-content');
+            const authRequiredMessage = document.getElementById('auth-required');
+            const creatorSection = document.getElementById('creator-section');
+            const viewerSection = document.getElementById('viewer-section');
+            const creatorConfirmationSection = document.getElementById('creator-confirmation-section');
+            const viewerConfirmationSection = document.getElementById('viewer-confirmation-section');
+            const questionsContainer = document.getElementById('questions-container');
+            const questionTemplate = questionsContainer.firstElementChild.cloneNode(true);
         
-        function setupLoginModal() {
-            const loginModal = document.getElementById('login-modal');
-            const authForm = document.getElementById('auth-form');
-            const modalError = document.getElementById('modal-error');
-            const showLoginBtn = document.getElementById('show-login-modal-btn');
-            const togglePasswordBtn = document.getElementById('toggle-password');
-            const passwordInput = document.getElementById('password');
-            const modalCloseBtn = document.getElementById('modal-close-btn');
-            let isLoginMode = true;
-
-            showLoginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
-            loginModal.addEventListener('click', (e) => {
-                if (e.target === loginModal) loginModal.style.display = 'none';
-            });
-            modalCloseBtn.addEventListener('click', () => loginModal.style.display = 'none');
-            
-            togglePasswordBtn.addEventListener('click', () => {
-                const isPassword = passwordInput.type === 'password';
-                passwordInput.type = isPassword ? 'text' : 'password';
-                togglePasswordBtn.querySelector('.eye-icon').style.display = isPassword ? 'none' : 'block';
-                togglePasswordBtn.querySelector('.eye-slash-icon').style.display = isPassword ? 'block' : 'none';
-            });
-            
-            document.getElementById('switch-btn').addEventListener('click', () => {
-                isLoginMode = !isLoginMode;
-                document.getElementById('modal-title').textContent = isLoginMode ? 'Accedi' : 'Registrati';
-                document.getElementById('modal-subtitle').textContent = isLoginMode ? 'Bentornato! Inserisci le tue credenziali.' : 'Crea un nuovo account per iniziare.';
-                document.getElementById('auth-btn').textContent = isLoginMode ? 'Accedi' : 'Registrati';
-                document.getElementById('switch-text').textContent = isLoginMode ? 'Non hai un account?' : 'Hai già un account?';
-                document.getElementById('switch-btn').textContent = isLoginMode ? 'Registrati' : 'Accedi';
-                modalError.style.display = 'none';
-            });
-
-            authForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                modalError.style.display = 'none';
-                try {
-                    const { error } = isLoginMode
-                        ? await supabaseClient.auth.signInWithPassword({ email, password })
-                        : await supabaseClient.auth.signUp({ email, password });
-                    if (error) throw error;
-                    loginModal.style.display = 'none';
-                    authForm.reset();
-                } catch (error) {
-                    modalError.textContent = error.message;
-                    modalError.style.display = 'block';
-                }
-            });
-        }
-        
-        function setupCreatorEventListeners(user) {
-            document.getElementById('add-question-btn').addEventListener('click', addQuestion);
-            document.getElementById('forum-creator-form').addEventListener('submit', (e) => createForum(e, user));
-            questionsContainer.addEventListener('click', handleCreatorClicks);
-            document.getElementById('copy-share-link-btn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('shareable-link').textContent).then(() => alert("Link di condivisione copiato!")));
-            document.getElementById('copy-answers-link-btn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('answers-link').querySelector('a').href).then(() => alert("Link delle risposte copiato!")));
-            document.getElementById('create-another-btn').addEventListener('click', () => window.location.href = window.location.origin + window.location.pathname);
-        }
-
-        function addQuestion() {
-            const newQuestion = questionTemplate.cloneNode(true);
-            const optionsDiv = newQuestion.querySelector('.options-sub-container');
-            optionsDiv.innerHTML = '<div class="option-input-group"><input type="text" class="option-input" placeholder="Opzione 1" required></div>';
-            newQuestion.querySelector('.question-input').value = '';
-            questionsContainer.appendChild(newQuestion);
-            updateQuestionUI();
-        }
-
-        function handleCreatorClicks(e) {
-            if (e.target.classList.contains('add-option-btn-sub')) {
-                const optionsDiv = e.target.previousElementSibling;
-                const newOption = document.createElement('div');
-                newOption.className = 'option-input-group';
-                newOption.innerHTML = `<input type="text" class="option-input" placeholder="Opzione ${optionsDiv.children.length + 1}" required><button type="button" class="btn-danger" onclick="this.parentElement.remove()">Rimuovi</button>`;
-                optionsDiv.appendChild(newOption);
+            function setupCanvas() {
+                const bgCanvas = document.getElementById('particle-canvas');
+                const bgCtx = bgCanvas.getContext('2d');
+                let particlesArray;
+                function setCanvasSize() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+                class Particle { constructor() { this.x = Math.random() * bgCanvas.width; this.y = Math.random() * bgCanvas.height; this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 2 - 1; this.speedY = Math.random() * 2 - 1; this.color = 'rgba(255, 255, 255, 0.5)'; } update() { if (this.x > bgCanvas.width || this.x < 0) this.speedX = -this.speedX; if (this.y > bgCanvas.height || this.y < 0) this.speedY = -this.speedY; this.x += this.speedX; this.y += this.speedY; } draw() { bgCtx.fillStyle = this.color; bgCtx.beginPath(); bgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2); bgCtx.fill(); } }
+                function initParticles() { particlesArray = []; let num = (bgCanvas.height * bgCanvas.width) / 9000; for (let i = 0; i < num; i++) { particlesArray.push(new Particle()); } }
+                function connect() { let o = 1; for (let a = 0; a < particlesArray.length; a++) { for (let b = a; b < particlesArray.length; b++) { let d = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2); if (d < (bgCanvas.width / 7) * (bgCanvas.height / 7)) { o = 1 - (d / 20000); bgCtx.strokeStyle = `rgba(255, 255, 255, ${o})`; bgCtx.lineWidth = 1; bgCtx.beginPath(); bgCtx.moveTo(particlesArray[a].x, particlesArray[a].y); bgCtx.lineTo(particlesArray[b].x, particlesArray[b].y); bgCtx.stroke(); } } } }
+                function animateBg() { bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height); particlesArray.forEach(p => { p.update(); p.draw(); }); connect(); requestAnimationFrame(animateBg); }
+                setCanvasSize();
+                initParticles();
+                animateBg();
+                window.addEventListener('resize', () => { setCanvasSize(); initParticles(); });
             }
-            if (e.target.classList.contains('remove-question-btn')) {
-                e.target.closest('.question-block').remove();
+
+            function setupAIChat() {
+                const aiToggleBtn = document.getElementById('ai-toggle-btn');
+                const aiChatContainer = document.getElementById('ai-chat-container');
+                const aiChatForm = document.getElementById('ai-chat-form');
+                const aiChatInput = document.getElementById('ai-chat-input');
+                const aiChatMessages = document.getElementById('ai-chat-messages');
+                const aiCloseBtn = document.getElementById('ai-close-btn');
+
+                if(aiToggleBtn) aiToggleBtn.addEventListener('click', () => { aiChatContainer.classList.add('visible'); aiChatInput.focus(); });
+                if(aiCloseBtn) aiCloseBtn.addEventListener('click', () => aiChatContainer.classList.remove('visible'));
+                if(aiChatContainer) aiChatContainer.addEventListener('click', (e) => { if (e.target === aiChatContainer) aiChatContainer.classList.remove('visible'); });
+                if(aiChatForm) aiChatForm.addEventListener('submit', (e) => { e.preventDefault(); const msg = aiChatInput.value.trim(); if(msg){ addMessage(msg, 'user'); aiChatInput.value = ''; getAiResponse(msg); } });
+                
+                function addMessage(text, sender) { const el = document.createElement('div'); el.className = `chat-message ${sender}-message`; el.textContent = text; aiChatMessages.appendChild(el); aiChatMessages.scrollTop = aiChatMessages.scrollHeight; return el; }
+                function typeMessage(el, text) { el.textContent = ''; let i = 0; function typing() { if(i < text.length) { el.textContent += text.charAt(i++); setTimeout(typing, 30); } } typing(); }
+                
+                async function getAiResponse(prompt) {
+                    const loadingEl = addMessage("...", 'ai');
+                    const apiKey = "AIzaSyCyllM7dVlaX0jwRAt8cjIypCpF3u3uBBc";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const systemInstruction = "Sei Sparky, un assistente AI per il sito FreeOpenSourceModule. Il tuo unico scopo è aiutare gli utenti a capire come usare il sito per creare e rispondere ai moduli. Rispondi SOLO a domande relative a queste funzionalità. Se ti viene chiesto altro, come chi ti ha creato o argomenti non pertinenti, rispondi gentilmente che non puoi fornire quel tipo di informazione. Sii conciso, amichevole e usa emoji. 😊";
+                    try {
+                        const res = await fetch(apiUrl, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `${systemInstruction}\nUtente: "${prompt}"` }] }] }) });
+                        if (!res.ok) throw new Error("Errore API");
+                        const data = await res.json();
+                        const aiText = data.candidates[0].content.parts[0].text;
+                        typeMessage(loadingEl, aiText);
+                    } catch (e) { typeMessage(loadingEl, "Oops, c'è un problema di rete. 😥"); }
+                }
+            }
+
+            function setupLoginModal() {
+                const loginModal = document.getElementById('login-modal');
+                const authForm = document.getElementById('auth-form');
+                const modalError = document.getElementById('modal-error');
+                const showLoginBtn = document.getElementById('show-login-modal-btn');
+                const togglePasswordBtn = document.getElementById('toggle-password');
+                const passwordInput = document.getElementById('password');
+                const modalCloseBtn = document.getElementById('modal-close-btn');
+                let isLoginMode = true;
+
+                showLoginBtn.addEventListener('click', () => loginModal.style.display = 'flex');
+                loginModal.addEventListener('click', (e) => {
+                    if (e.target === loginModal) loginModal.style.display = 'none';
+                });
+                modalCloseBtn.addEventListener('click', () => loginModal.style.display = 'none');
+                
+                togglePasswordBtn.addEventListener('click', () => {
+                    const isPassword = passwordInput.type === 'password';
+                    passwordInput.type = isPassword ? 'text' : 'password';
+                    togglePasswordBtn.querySelector('.eye-icon').style.display = isPassword ? 'none' : 'block';
+                    togglePasswordBtn.querySelector('.eye-slash-icon').style.display = isPassword ? 'block' : 'none';
+                });
+                
+                document.getElementById('switch-btn').addEventListener('click', () => {
+                    isLoginMode = !isLoginMode;
+                    document.getElementById('modal-title').textContent = isLoginMode ? 'Accedi' : 'Registrati';
+                    document.getElementById('modal-subtitle').textContent = isLoginMode ? 'Bentornato! Inserisci le tue credenziali.' : 'Crea un nuovo account per iniziare.';
+                    document.getElementById('auth-btn').textContent = isLoginMode ? 'Accedi' : 'Registrati';
+                    document.getElementById('switch-text').textContent = isLoginMode ? 'Non hai un account?' : 'Hai già un account?';
+                    document.getElementById('switch-btn').textContent = isLoginMode ? 'Registrati' : 'Accedi';
+                    modalError.style.display = 'none';
+                });
+
+                authForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    modalError.style.display = 'none';
+                    try {
+                        const { error } = isLoginMode
+                            ? await supabaseClient.auth.signInWithPassword({ email, password })
+                            : await supabaseClient.auth.signUp({ email, password });
+                        if (error) throw error;
+                        loginModal.style.display = 'none';
+                        authForm.reset();
+                    } catch (error) {
+                        modalError.textContent = error.message;
+                        modalError.style.display = 'block';
+                    }
+                });
+            }
+            
+            function setupCreatorEventListeners(user) {
+                document.getElementById('add-question-btn').addEventListener('click', addQuestion);
+                document.getElementById('forum-creator-form').addEventListener('submit', (e) => createForum(e, user));
+                questionsContainer.addEventListener('click', handleCreatorClicks);
+                document.getElementById('copy-share-link-btn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('shareable-link').textContent).then(() => alert("Link di condivisione copiato!")));
+                document.getElementById('copy-answers-link-btn').addEventListener('click', () => navigator.clipboard.writeText(document.getElementById('answers-link').querySelector('a').href).then(() => alert("Link delle risposte copiato!")));
+                document.getElementById('create-another-btn').addEventListener('click', () => {
+                    creatorConfirmationSection.style.display = 'none';
+                    creatorSection.style.display = 'block';
+                    resetCreatorForm();
+                });
+            }
+
+            function resetCreatorForm(fullReset = true) {
+                if(fullReset) {
+                    document.getElementById('forum-creator-form').reset();
+                }
+                questionsContainer.innerHTML = '';
+                questionsContainer.appendChild(questionTemplate.cloneNode(true));
                 updateQuestionUI();
             }
-        }
-        
-        function updateQuestionUI() {
-            const questionBlocks = questionsContainer.querySelectorAll('.question-block');
-            questionBlocks.forEach((block, index) => {
-                block.querySelector('.question-header label').textContent = `Domanda ${index + 1}`;
-                const removeBtn = block.querySelector('.remove-question-btn');
-                removeBtn.style.display = questionBlocks.length > 1 ? 'inline-block' : 'none';
-            });
-        }
 
-        async function createForum(e, user) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            const errorMessage = document.getElementById('creator-error-message');
-            btn.textContent = 'Creazione...';
-            btn.disabled = true;
-            errorMessage.style.display = 'none';
+            function addQuestion() {
+                const newQuestion = questionTemplate.cloneNode(true);
+                const optionsDiv = newQuestion.querySelector('.options-sub-container');
+                optionsDiv.innerHTML = '<div class="option-input-group"><input type="text" class="option-input" placeholder="Opzione 1" required></div>';
+                newQuestion.querySelector('.question-input').value = '';
+                questionsContainer.appendChild(newQuestion);
+                updateQuestionUI();
+            }
 
-            const title = document.getElementById('forum-title').value;
-            const questionsData = Array.from(document.querySelectorAll('.question-block')).map(block => ({
-                text: block.querySelector('.question-input').value,
-                options: Array.from(block.querySelectorAll('.option-input')).map(opt => opt.value).filter(Boolean)
-            }));
-
-            try {
-                const { data, error } = await supabaseClient.from('forums').insert([{ title, questions: questionsData, user_id: user.id }]).select().single();
-                if (error) throw error;
-                
-                const projectRef = "xvjjnpwatfpjceqqkraz";
-                const shareableLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
-                const answersLink = `https://app.supabase.com/project/${projectRef}/storage/buckets/answers`;
-
-                document.getElementById('shareable-link').textContent = shareableLink;
-                document.getElementById('answers-link').innerHTML = `<a href="${answersLink}" target="_blank" rel="noopener noreferrer">Apri la dashboard delle risposte</a>`;
-                
-                creatorSection.style.display = 'none';
-                creatorConfirmationSection.style.display = 'block';
-            } catch (error) {
-                console.error("Errore creazione modulo:", error);
-                if (error.message.toLowerCase().includes('failed to fetch')) {
-                    errorMessage.textContent = "Errore di rete. Controlla la tua connessione e che il progetto Supabase sia attivo.";
-                } else {
-                    errorMessage.textContent = "Si è verificato un errore: " + error.message;
+            function handleCreatorClicks(e) {
+                if (e.target.classList.contains('add-option-btn-sub')) {
+                    const optionsDiv = e.target.previousElementSibling;
+                    const newOption = document.createElement('div');
+                    newOption.className = 'option-input-group';
+                    newOption.innerHTML = `<input type="text" class="option-input" placeholder="Opzione ${optionsDiv.children.length + 1}" required><button type="button" class="btn-danger" onclick="this.parentElement.remove()">Rimuovi</button>`;
+                    optionsDiv.appendChild(newOption);
                 }
-                errorMessage.style.display = 'block';
-                btn.textContent = 'Crea Modulo';
-                btn.disabled = false;
+                if (e.target.classList.contains('remove-question-btn')) {
+                    e.target.closest('.question-block').remove();
+                    updateQuestionUI();
+                }
             }
-        }
-
-        async function loadForum(id) {
-            try {
-                const { data, error } = await supabaseClient.from('forums').select('*').eq('id', id).single();
-                if (error || !data) throw new Error("Modulo non trovato.");
-                
-                creatorSection.style.display = 'none';
-                viewerSection.style.display = 'block';
-                document.getElementById('viewer-title').textContent = data.title;
-                
-                const questionsContainer = document.getElementById('viewer-questions-container');
-                questionsContainer.innerHTML = '';
-                data.questions.forEach((q, index) => {
-                    const questionBlock = document.createElement('div');
-                    questionBlock.className = 'form-group question-block';
-                    const optionsHTML = q.options.map(opt => `<label><input type="radio" name="scelta_${index}" value="${opt}" required><span>${opt}</span></label>`).join('');
-                    questionBlock.innerHTML = `<label>${q.text}</label><div class="radio-group">${optionsHTML}</div>`;
-                    questionsContainer.appendChild(questionBlock);
+            
+            function updateQuestionUI() {
+                const questionBlocks = questionsContainer.querySelectorAll('.question-block');
+                questionBlocks.forEach((block, index) => {
+                    block.querySelector('.question-header label').textContent = `Domanda ${index + 1}`;
+                    const removeBtn = block.querySelector('.remove-question-btn');
+                    removeBtn.style.display = questionBlocks.length > 1 ? 'inline-block' : 'none';
                 });
-                
-                setupViewerValidation(id, data.questions.length);
-
-            } catch(error) {
-                creatorSection.innerHTML = `<h2>Oops!</h2><p>${error.message}</p><a href="/" class="btn">Torna alla creazione</a>`;
-                creatorSection.style.textAlign = 'center';
             }
-        }
 
-        function setupViewerValidation(forumId, questionCount) {
-            const nameInput = document.getElementById('viewer-name');
-            const submitBtn = document.getElementById('submit-answer-btn');
-            const form = document.getElementById('forum-viewer-form');
-            const errorMessage = document.getElementById('viewer-error-message');
-
-            const validate = () => {
-                const nameValid = nameInput.value.trim() !== '';
-                const answers = document.querySelectorAll('input[type="radio"]:checked');
-                submitBtn.disabled = !(nameValid && answers.length === questionCount);
-            };
-
-            form.addEventListener('change', validate);
-            nameInput.addEventListener('input', validate);
-
-            form.addEventListener('submit', async (e) => {
+            async function createForum(e, user) {
                 e.preventDefault();
-                submitBtn.disabled = true;
+                const btn = e.target.querySelector('button[type="submit"]');
+                const errorMessage = document.getElementById('creator-error-message');
+                btn.textContent = 'Creazione...';
+                btn.disabled = true;
                 errorMessage.style.display = 'none';
 
-                const name = nameInput.value;
-                const answersData = Array.from(document.querySelectorAll('#viewer-questions-container .question-block')).map((block, index) => {
-                    const questionText = block.querySelector('label').textContent;
-                    const choice = block.querySelector(`input[name="scelta_${index}"]:checked`).value;
-                    return { question: questionText, answer: choice };
-                });
+                const title = document.getElementById('forum-title').value;
+                const questionsData = Array.from(document.querySelectorAll('.question-block')).map(block => ({
+                    text: block.querySelector('.question-input').value,
+                    options: Array.from(block.querySelectorAll('.option-input')).map(opt => opt.value).filter(Boolean)
+                }));
 
                 try {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-                    doc.setFont("helvetica", "bold");
-                    doc.text(`Risposte - Modulo: ${document.getElementById('viewer-title').textContent}`, 10, 20);
-                    doc.setFont("helvetica", "normal");
-                    doc.text(`Inviato da: ${name}`, 10, 30);
-                    let yPos = 50;
-                    answersData.forEach(item => {
-                        if (yPos > 280) { doc.addPage(); yPos = 20; }
-                        doc.setFont("helvetica", "bold");
-                        doc.text(item.question, 10, yPos);
-                        yPos += 7;
-                        doc.setFont("helvetica", "normal");
-                        doc.text(`- ${item.answer}`, 15, yPos);
-                        yPos += 15;
-                    });
-                    const pdfBlob = doc.output('blob');
-                    const fileName = `forum_${forumId}/${name.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
-                    const { error } = await supabaseClient.storage.from('answers').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: false });
+                    const { data, error } = await supabaseClient.from('forums').insert([{ title, questions: questionsData, user_id: user.id }]).select().single();
                     if (error) throw error;
-                    viewerSection.style.display = 'none';
-                    viewerConfirmationSection.style.display = 'block';
+                    
+                    const projectRef = "xvjjnpwatfpjceqqkraz";
+                    const shareableLink = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
+                    const answersLink = `https://app.supabase.com/project/${projectRef}/storage/buckets/answers/forum_${data.id}`;
+
+                    document.getElementById('shareable-link').textContent = shareableLink;
+                    document.getElementById('answers-link').innerHTML = `<a href="${answersLink}" target="_blank" rel="noopener noreferrer">Apri la dashboard delle risposte</a>`;
+                    
+                    creatorSection.style.display = 'none';
+                    creatorConfirmationSection.style.display = 'block';
                 } catch (error) {
-                    console.error("Errore invio risposta:", error);
+                    console.error("Errore creazione modulo:", error);
                     if (error.message.toLowerCase().includes('failed to fetch')) {
-                        errorMessage.textContent = "Errore di rete. Impossibile inviare la risposta.";
+                        errorMessage.textContent = "Errore di rete. Controlla la tua connessione e che il progetto Supabase sia attivo.";
                     } else {
-                        errorMessage.textContent = "Errore: " + error.message;
+                        errorMessage.textContent = "Si è verificato un errore: " + error.message;
                     }
                     errorMessage.style.display = 'block';
-                    submitBtn.disabled = false;
+                    btn.textContent = 'Crea Modulo';
+                    btn.disabled = false;
                 }
-            });
-        }
-        
-        function setupAIChat() {
-            const aiToggleBtn = document.getElementById('ai-toggle-btn');
-            const aiChatContainer = document.getElementById('ai-chat-container');
-            const aiChatForm = document.getElementById('ai-chat-form');
-            const aiChatInput = document.getElementById('ai-chat-input');
-            const aiChatMessages = document.getElementById('ai-chat-messages');
-            const aiCloseBtn = document.getElementById('ai-close-btn');
-
-            if(aiToggleBtn) aiToggleBtn.addEventListener('click', () => { aiChatContainer.classList.add('visible'); aiChatInput.focus(); });
-            if(aiCloseBtn) aiCloseBtn.addEventListener('click', () => aiChatContainer.classList.remove('visible'));
-            if(aiChatContainer) aiChatContainer.addEventListener('click', (e) => { if (e.target === aiChatContainer) aiChatContainer.classList.remove('visible'); });
-            if(aiChatForm) aiChatForm.addEventListener('submit', (e) => { e.preventDefault(); const msg = aiChatInput.value.trim(); if(msg){ addMessage(msg, 'user'); aiChatInput.value = ''; getAiResponse(msg); } });
-            
-            function addMessage(text, sender) { const el = document.createElement('div'); el.className = `chat-message ${sender}-message`; el.textContent = text; aiChatMessages.appendChild(el); aiChatMessages.scrollTop = aiChatMessages.scrollHeight; return el; }
-            function typeMessage(el, text) { el.textContent = ''; let i = 0; function typing() { if(i < text.length) { el.textContent += text.charAt(i++); setTimeout(typing, 30); } } typing(); }
-            
-            async function getAiResponse(prompt) {
-                const loadingEl = addMessage("...", 'ai');
-                const apiKey = "AIzaSyCyllM7dVlaX0jwRAt8cjIypCpF3u3uBBc";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-                const systemInstruction = "Sei Sparky, un assistente AI per il sito FreeOpenSourceModule. Il tuo unico scopo è aiutare gli utenti a capire come usare il sito per creare e rispondere ai moduli. Rispondi SOLO a domande relative a queste funzionalità. Se ti viene chiesto altro, come chi ti ha creato o argomenti non pertinenti, rispondi gentilmente che non puoi fornire quel tipo di informazione. Sii conciso, amichevole e usa emoji. 😊";
-                try {
-                    const res = await fetch(apiUrl, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `${systemInstruction}\nUtente: "${prompt}"` }] }] }) });
-                    if (!res.ok) throw new Error("Errore API");
-                    const data = await res.json();
-                    const aiText = data.candidates[0].content.parts[0].text;
-                    typeMessage(loadingEl, aiText);
-                } catch (e) { typeMessage(loadingEl, "Oops, c'è un problema di rete. 😥"); }
             }
-        }
+
+            async function loadForum(id, user) {
+                try {
+                    const { data, error } = await supabaseClient.from('forums').select('*, user_id').eq('id', id).single();
+                    if (error || !data) throw new Error("Modulo non trovato.");
+                    
+                    creatorSection.style.display = 'none';
+                    viewerSection.style.display = 'block';
+                    document.getElementById('viewer-title').textContent = data.title;
+                    
+                    const questionsContainer = document.getElementById('viewer-questions-container');
+                    questionsContainer.innerHTML = '';
+                    data.questions.forEach((q, index) => {
+                        const questionBlock = document.createElement('div');
+                        questionBlock.className = 'form-group question-block';
+                        const optionsHTML = q.options.map(opt => `<label><span><input type="radio" name="scelta_${index}" value="${opt}" required>${opt}</span></label>`).join('');
+                        questionBlock.innerHTML = `<label>${q.text}</label><div class="radio-group">${optionsHTML}</div>`;
+                        questionsContainer.appendChild(questionBlock);
+                    });
+                    
+                    if (user && user.id === data.user_id) {
+                        document.getElementById('view-answers-btn').style.display = 'block';
+                    }
+                    
+                    setupViewerValidation(id, data.questions.length);
+
+                } catch(error) {
+                    viewerSection.innerHTML = `<h2>Oops!</h2><p>${error.message}</p><a href="/" class="btn">Torna alla creazione</a>`;
+                    viewerSection.style.textAlign = 'center';
+                }
+            }
+
+            function setupViewerValidation(forumId, questionCount) {
+                const nameInput = document.getElementById('viewer-name');
+                const submitBtn = document.getElementById('submit-answer-btn');
+                const form = document.getElementById('forum-viewer-form');
+                const errorMessage = document.getElementById('viewer-error-message');
+
+                const validate = () => {
+                    const nameValid = nameInput.value.trim() !== '';
+                    const answers = document.querySelectorAll('input[type="radio"]:checked');
+                    submitBtn.disabled = !(nameValid && answers.length === questionCount);
+                };
+
+                form.addEventListener('change', validate);
+                nameInput.addEventListener('input', validate);
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    submitBtn.disabled = true;
+                    errorMessage.style.display = 'none';
+
+                    const name = nameInput.value;
+                    const answersData = Array.from(document.querySelectorAll('#viewer-questions-container .question-block')).map((block, index) => {
+                        const questionText = block.querySelector('label').textContent;
+                        const choice = block.querySelector(`input[name="scelta_${index}"]:checked`).value;
+                        return { question: questionText, answer: choice };
+                    });
+
+                    try {
+                        const { jsPDF } = window.jspdf;
+                        const doc = new jsPDF();
+                        doc.setFont("helvetica", "bold");
+                        doc.text(`Risposte - Modulo: ${document.getElementById('viewer-title').textContent}`, 10, 20);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(`Inviato da: ${name}`, 10, 30);
+                        let yPos = 50;
+                        answersData.forEach(item => {
+                            if (yPos > 280) { doc.addPage(); yPos = 20; }
+                            doc.setFont("helvetica", "bold");
+                            doc.text(item.question, 10, yPos);
+                            yPos += 7;
+                            doc.setFont("helvetica", "normal");
+                            doc.text(`- ${item.answer}`, 15, yPos);
+                            yPos += 15;
+                        });
+                        const pdfBlob = doc.output('blob');
+                        const fileName = `forum_${forumId}/${name.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+                        const { error } = await supabaseClient.storage.from('answers').upload(fileName, pdfBlob, { contentType: 'application/pdf', upsert: false });
+                        if (error) throw error;
+                        viewerSection.style.display = 'none';
+                        viewerConfirmationSection.style.display = 'block';
+                    } catch (error) {
+                        console.error("Errore invio risposta:", error);
+                        if (error.message.toLowerCase().includes('failed to fetch')) {
+                            errorMessage.textContent = "Errore di rete. Impossibile inviare la risposta.";
+                        } else {
+                            errorMessage.textContent = "Errore: " + error.message;
+                        }
+                        errorMessage.style.display = 'block';
+                        submitBtn.disabled = false;
+                    }
+                });
+            }
+            
+            setupCanvas();
+        });
     </script>
 </body>
 </html>
